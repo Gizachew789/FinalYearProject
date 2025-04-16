@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
@@ -27,94 +25,32 @@ class LoginController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
-    
+    public function login(Request $request)
+    {
+        // Validate the login request
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-  
-    //  public function login(Request $request)
-    //  {
-    //      $credentials = $request->only('email', 'password');
-     
-    //      if (Auth::attempt($credentials)) {
-    //          $request->session()->regenerate();
-     
-    //          // Redirect based on role, if you're doing role-based login
-    //          if (auth()->user()->hasRole('admin')) {
-    //              return redirect()->intended('/admin/dashboard');
-    //          } elseif (auth()->user()->hasRole('reception')) {
-    //              return redirect()->intended('/reception/dashboard');
-    //          }
-     
-    //          return redirect()->intended('/');
-    //      }
-     
-    //      return back()->withErrors([
-    //          'email' => 'Invalid credentials.',
-    //      ]);
-    //  }
-     
-     
-     public function login(Request $request)
-     {
-         $user = User::where('email', $request->email)->first();
-        
-        
-     
-         if ($user && Hash::check($request->password, $user->password)) {
-        // ✅ Check hashed password
-             Auth::login($user);
-             if($user->role == 'Admin'){
-                return redirect('/admin/dashboard')->with('message', 'Login successful');
+        // Attempt to find the user by email
+        $user = User::where('email', $request->email)->first();
 
-             }
-             if($user->role == 'Reception'){
-                return redirect('/reception/dashboard')->with('message', 'Login successful');
-             }
-             return redirect('/')->with('message', 'Login successful');
-         }
-     
-         return redirect("/login")->with(['error' => 'Invalid credentials'], 401);
-     }
-     
-    //     public function login(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|string|email',
-    //         'password' => 'required|string',
-    //     ]);
+        // Check if the user exists and the password is correct
+        if ($user && Hash::check($request->password, $user->password)) {
+            // Log the user in
+            Auth::login($user);
 
-    //     if ($validator->fails()) {
-    //         return redirect()->back()
-    //             ->withErrors($validator)
-    //             ->withInput($request->except('password'));
-    //     }
+            // Redirect based on the user's role
+            return $this->redirectBasedOnRole($user);
+        }
 
-    //     $credentials = $request->only('email', 'password');
-    //     $remember = $request->filled('remember');
-
-    //     if (Auth::attempt($credentials, $remember)) {
-    //         $request->session()->regenerate();
-            
-    //         $user = Auth::user();
-            
-    //         if ($user->status !== 'active') {
-    //             Auth::logout();
-                
-    //             throw ValidationException::withMessages([
-    //                 'email' => ['Your account is inactive. Please contact the administrator.'],
-    //             ]);
-    //         }
-            
-    //         // Redirect based on user role
-    //         return $this->redirectBasedOnRole($user);
-    //     }
-
-    //     throw ValidationException::withMessages([
-    //         'email' => [trans('auth.failed')],
-    //     ]);
-    // }
+        // Redirect back with an error if credentials are invalid
+        return redirect()->route('login')->withErrors([
+            'email' => 'Invalid credentials.',
+        ]);
+    }
 
     /**
      * Redirect the user based on their role.
@@ -122,23 +58,21 @@ class LoginController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function redirectBasedOnRole(User $user)
+    protected function authenticated($request, $user)
     {
-        switch ($user->role) {
-            case 'admin':
-                return redirect()->route('admin.dashboard');
-            case 'physician':
-                return redirect()->route('physician.dashboard');
-            case 'reception':
-                return redirect()->route('reception.dashboard');
-            case 'lab_technician':
-                return redirect()->route('lab.dashboard');
-            case 'pharmacist':
-                return redirect()->route('pharmacy.dashboard');
-            case 'patient':
-                return redirect()->route('patient.dashboard');
-            default:
-                return redirect('/');
+        if ($user->role == 'admin') {
+            return redirect()->route('admin.dashboard')->with('message', 'Login successful');
+        } elseif ($user->role == 'reception') {
+            return redirect()->route('reception.dashboard')->with('message', 'Login successful');
+        } elseif ($user->role == 'physician') {
+            return redirect()->route('physician.dashboard')->with('message', 'Login successful');
+        } elseif ($user->role == 'lab_technician') {
+            return redirect()->route('lab.dashboard')->with('message', 'Login successful');
+        } elseif ($user->role == 'pharmacist') {
+            return redirect()->route('pharmacist.dashboard')->with('message', 'Login successful');
+        } else ($user->role == 'patient') {
+            return redirect()->route('patient.dashboard')->with('message', 'Login successful');
+            
         }
     }
 
@@ -155,7 +89,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('/login')->with('message', 'Logged out successfully.');
     }
 }
-

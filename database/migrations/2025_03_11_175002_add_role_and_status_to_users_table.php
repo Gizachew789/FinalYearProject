@@ -12,18 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->enum('role', ['admin', 'Bsc_Nurse', 'patient', 'reception', 'lab_technician', 'Health_Officer', 'pharmacist'])
+                      ->after('password')
+                     ->default('admin')
+                      ->notNullable();
+            }
 
-               if (!Schema::hasColumn('users', 'role')) {
-            $table->enum('role', ['admin', 'Bsc_Nurse', 'patient', 'reception', 'lab_technician', 'Health_Officer', 'pharmacist'])->after('password')->notNull();
-    }
+            if (!Schema::hasColumn('users', 'phone')) {
+                $table->string('phone', 255)
+                      ->after('role')
+                      ->notNullable();
+            }
 
-    if (!Schema::hasColumn('users', 'phone')) {
-        $table->string('phone', 255)->after('role')->notNull();
-    }
-                //$table->enum('role', ['admin', 'physician', 'patient', 'reception', 'lab_technician', 'pharmacist'])->after('password');
-           
-           // $table->string('phone')->notNullable()->after('role');
-            $table->enum('status', ['active', 'inactive'])->default('active')->after('phone');
+            if (!Schema::hasColumn('users', 'status')) {
+                $table->enum('status', ['active', 'inactive'])
+                      ->default('active')
+                      ->after('phone');
+            }
         });
     }
 
@@ -33,8 +39,17 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'phone', 'status']);
+            if (Schema::hasColumn('users', 'role')) {
+                $table->dropColumn('role');
+            }
+
+            if (Schema::hasColumn('users', 'phone')) {
+                $table->dropColumn('phone');
+            }
+
+            if (Schema::hasColumn('users', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 };
-

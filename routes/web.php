@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Auth\PatientRegistrationController;
@@ -29,18 +30,8 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
-
-Route::get('/reception/dashboard', function () {
-    return view('reception.dashboard');
-})->name('admin.dashboard'); 
-
-
-
 // Admin routes
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Admin dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
@@ -97,7 +88,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 // @endif
 
 // Reception routes
-Route::prefix('reception')->name('reception.')->middleware(['auth'])->group(function () {
+Route::prefix('reception')->name('reception.')->middleware(['auth', 'reception'])->group(function () {
     Route::get('/dashboard', function () {
         return view('reception.dashboard');
     })->name('dashboard');
@@ -152,7 +143,6 @@ Route::get('/admin/manage/staff', function(){
 })->name('manage.staff');
 
 
-// inertia routes
-// Route::get('/', function () {
-//     return Inertia::render('Home');
-// });
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->name('web.dashboard');
