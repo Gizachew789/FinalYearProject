@@ -17,24 +17,13 @@ use Illuminate\Support\Facades\Validator;
 class UserRegistrationController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('admin');
-    }
-
-    /**
      * Show the staff registration form.
      *
-     * @return \Illuminate\View\View
+     * @return \Inertia\Response
      */
     public function showRegistrationForm()
     {
-        return view('auth.admin.register-user');
+        return inertia('admin/UserRegistration');
     }
 
     /**
@@ -45,6 +34,7 @@ class UserRegistrationController extends Controller
      */
     public function register(Request $request)
     {
+        // Validate the request
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -70,7 +60,7 @@ class UserRegistrationController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create user
+            // Create the user
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -101,7 +91,7 @@ class UserRegistrationController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.user.index')
+            return redirect()->route('admin.users.index')
                 ->with('success', 'Staff member registered successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -124,7 +114,6 @@ class UserRegistrationController extends Controller
             'user_id' => $user->id,
             'name' => $request->name,
             'department' => $request->department,
-            'department' => $request->department,
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
             'address' => $request->address,
@@ -135,7 +124,7 @@ class UserRegistrationController extends Controller
     }
 
     /**
-     * Create a healthOfficer profile.
+     * Create a health officer profile.
      *
      * @param  \App\Models\User  $user
      * @param  \Illuminate\Http\Request  $request
@@ -144,7 +133,7 @@ class UserRegistrationController extends Controller
     protected function createhealthOfficer(User $user, Request $request)
     {
         healthOfficer::create([
-            'user_id' =>$user->id,
+            'user_id' => $user->id,
             'name' => $request->name,
             'department' => $request->department,
             'specialization' => $request->specialization,
@@ -230,4 +219,3 @@ class UserRegistrationController extends Controller
         ]);
     }
 }
-

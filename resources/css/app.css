@@ -2,7 +2,9 @@
 /* Ensure TailwindCSS directives are processed */
 @tailwind base;
 @tailwind components;
+/* Ensure TailwindCSS utility classes are processed */
 @tailwind utilities;
+
 
 /* Custom styles */
 :root {
@@ -28,7 +30,7 @@
     border-radius: 0.5rem; /* Tailwind's rounded-lg */
     padding: 1.5rem; /* Tailwind's p-6 */
     background-color: #ffffff; /* Tailwind's bg-white */
-    @apply shadow-lg rounded-lg p-6 bg-white;
+    /* Removed @apply directive to avoid redundancy */
 }
 
 /* Add any additional custom styles below */

@@ -1,4 +1,4 @@
-<?php
+
 @extends('layouts.app')
 
 @section('content')
@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <!-- This component displays alert messages, such as success or error notifications -->
                     <!-- For customization or further details, refer to the documentation: https://laravel.com/docs/8.x/blade#components -->
-                    <x-alert />
+                  
 
                     <div class="row">
                         @php
@@ -24,10 +24,10 @@
                                     'class' => 'btn-primary'
                                 ],
                                 [
-                                    'title' => 'Register New Staff',
+                                    'title' => 'Register New User',
                                     'text' => 'Add a new staff member to the system.',
                                     'route' => route('admin.register.user'),
-                                    'button' => 'Register New Staff',
+                                    'button' => 'Register New User',
                                     'class' => 'btn-success'
                                 ],
                                 [
@@ -40,7 +40,7 @@
                                 [
                                     'title' => 'Inventory Management',
                                     'text' => 'Manage and monitor inventory items.',
-                                    'route' => route('admin.inventory.manage'),
+                                    'route' => route('admin.inventory.index'),
                                     'button' => 'Manage Inventory',
                                     'class' => 'btn-warning'
                                 ],

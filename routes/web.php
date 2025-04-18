@@ -31,7 +31,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // Admin routes
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     // Admin dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
@@ -81,6 +81,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/register-user', [UserRegistrationController::class, 'showRegistrationForm'])->name('register.user');
     Route::post('/register-user', [UserRegistrationController::class, 'register'])->name('register.user.store');
 });
+
+
+
+
 
 // @if (Route::has('register'))
 //     <p>Register route exists!</p>

@@ -36,15 +36,34 @@ class LoginController extends Controller
 
         // Attempt to find the user by email
         $user = User::where('email', $request->email)->first();
+        
 
         // Check if the user exists and the password is correct
         if ($user && Hash::check($request->password, $user->password)) {
+         
             // Log the user in
             Auth::login($user);
 
+            if ($user->role == 'Admin') {
+                return redirect()->route('admin.dashboard')->with('message', 'Login successful');
+             }
+            // elseif ($user->role == 'reception') {
+            //     return redirect()->route('reception.dashboard')->with('message', 'Login successful');
+            // } elseif ($user->role == 'physician') {
+            //     return redirect()->route('physician.dashboard')->with('message', 'Login successful');
+            // } elseif ($user->role == 'lab_technician') {
+            //     return redirect()->route('lab.dashboard')->with('message', 'Login successful');
+            // } elseif ($user->role == 'pharmacist') {
+            //     return redirect()->route('pharmacist.dashboard')->with('message', 'Login successful');
+            // } elseif ($user->role == 'patient') {
+            //     return redirect()->route('patient.dashboard')->with('message', 'Login successful');
+                
+            // }
+
             // Redirect based on the user's role
-            return $this->redirectBasedOnRole($user);
+            // return $this->redirectBasedOnRole($user);
         }
+
 
         // Redirect back with an error if credentials are invalid
         return redirect()->route('login')->withErrors([
@@ -70,7 +89,7 @@ class LoginController extends Controller
             return redirect()->route('lab.dashboard')->with('message', 'Login successful');
         } elseif ($user->role == 'pharmacist') {
             return redirect()->route('pharmacist.dashboard')->with('message', 'Login successful');
-        } else ($user->role == 'patient') {
+        } elseif ($user->role == 'patient') {
             return redirect()->route('patient.dashboard')->with('message', 'Login successful');
             
         }
