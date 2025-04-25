@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'dashboard']);
-    Route::put('/dashboard/settings', [DashboardController::class, 'updateSettings'])
+    Route::put('/dashboard/settings', [DashboardController::class, 'updateSettings']);
     Route::get('/dashboard/appointment-stats', [DashboardController::class, 'appointmentStats']);
 
     // Appointments

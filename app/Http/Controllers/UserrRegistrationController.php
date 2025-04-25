@@ -1,18 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Admin;
-use App\Models\LabTechnician;
-use App\Models\Pharmacist;
-use App\Models\healthOfficer;
-use App\Models\Reception;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class UserRegistrationController extends Controller
 {
@@ -23,7 +13,7 @@ class UserRegistrationController extends Controller
      */
     public function showRegistrationForm()
     {
-        return inertia('admin/UserRegistration');
+        return Inertia::render('admin/UserRegistration');
     }
 
     /**

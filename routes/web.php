@@ -2,13 +2,13 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ResultController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserRegistrationController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Auth\PatientRegistrationController;
-use App\Http\Controllers\Auth\UserRegistrationController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
@@ -31,13 +31,17 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // Admin routes
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(function () 
+    // routes
+
+ {
     // Admin dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
     // User management
+    Route::get('/users/create', [UserRegistrationController::class, 'create'])->name('users.create');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
@@ -78,8 +82,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/inventory/low-stock', [InventoryController::class, 'lowStock'])->name('inventory.lowStock'); // view low stock item
 
     // Staff registration
-    Route::get('/register-user', [UserRegistrationController::class, 'showRegistrationForm'])->name('register.user');
-    Route::post('/register-user', [UserRegistrationController::class, 'register'])->name('register.user.store');
+    Route::get('/register-user', [UserRegistrationController::class, 'create'])->name('register.user');
+    Route::post('/register-user', [UserRegistrationController::class, 'store'])->name('register.user.store');
 });
 
 
@@ -141,12 +145,3 @@ Route::prefix('patient')->middleware(['auth'])->name('patient.')->group(function
     })->name('dashboard');
 });
 
-
-Route::get('/admin/manage/staff', function(){
-    return "managing staff";
-})->name('manage.staff');
-
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->name('web.dashboard');

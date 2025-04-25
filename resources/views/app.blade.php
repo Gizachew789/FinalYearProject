@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
-    @viteReactRefresh
-    @vite('resources/js/app.jsx')
-    @inertiaHead
+    <meta charset="UTF-8">
+    <title>My Blade App</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased">
-    @inertia
+<body>
+    @yield('content')
 </body>
 </html>

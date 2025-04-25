@@ -14,9 +14,10 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-       'admin' => \App\Http\Middleware\AdminMiddleware::class,
-       'reception' => \App\Http\Middleware\ReceptionMiddleware::class, 
-       'web' => \App\Http\Middleware\HandleInertiaRequests::class,
+         'auth' => \App\Http\Middleware\Authenticate::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+       'reception' => \App\Http\Middleware\ReceptionMiddleware::class,
+       'is_admin' => \App\Http\Middleware\IsAdmin::class, 
 
     ];
 }

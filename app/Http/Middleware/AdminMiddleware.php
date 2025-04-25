@@ -7,20 +7,13 @@ use Illuminate\Http\Request;
 
 class AdminMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next)
     {
-        if (!$request->user() || !$request->user()->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized. Admin access required.'], 403);
+        // Custom logic to check if user is an admin
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            return redirect('/');  // Redirect to homepage if not admin
         }
 
         return $next($request);
     }
 }
-
