@@ -26,24 +26,28 @@ Route::get('/', function () {
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // Admin routes
-Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(function () 
-    // routes
 
- {
+  
+
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     // Admin dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
+    // Staff registration
+     Route::get('/register-user', [UserRegistrationController::class, 'create'])->name('register.user');
+    Route::post('/register-user', [UserRegistrationController::class, 'store'])->name('register.user.store'); 
+
     // User management
     Route::get('/users/create', [UserRegistrationController::class, 'create'])->name('users.create');
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
@@ -69,23 +73,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index'); // View all attendance records
     Route::get('/attendance/{user}', [AttendanceController::class, 'show'])->name('attendance.show'); // View a specific user's attendance
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-    Route::post('/attendance/{user}/confirm', [AttendanceController::class, 'confirm'])->name('attendance.confirm'); // Confirm a user's attendance
+    Route::get('/attendance/{user}/confirm', [AttendanceController::class, 'confirmForm'])->name('attendance.confirm'); // Confirm a user's attendance
+    Route::get('/attendance/create', [AttendanceController::class, 'create'])->name('attendance.create');
+    Route::post('/attendance/{user}/confirm', [AttendanceController::class, 'confirm'])->name('attendance.confirm.submit'); // Confirm a user's attendance
 
     // Inventory management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index'); // View all inventory items
     Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create'); // Create a new inventory item
     Route::get('/inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');  
     Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store'); // Store a new inventory item
-    Route::get('/inventory/{item}/edit', [InventoryController::class, 'edit'])->name('inventory.edit'); // Edit an inventory item
-    Route::put('/inventory/{item}', [InventoryController::class, 'update'])->name('inventory.update'); // Update an inventory item
-    Route::delete('/inventory/{item}', [InventoryController::class, 'destroy'])->name('inventory.destroy'); // Delete an inventory item
+    Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit'); // Edit an inventory item
+    Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update'); // Update an inventory item
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy'); // Delete an inventory item
     Route::get('/inventory/low-stock', [InventoryController::class, 'lowStock'])->name('inventory.lowStock'); // view low stock item
 
-    // Staff registration
-    Route::get('/register-user', [UserRegistrationController::class, 'create'])->name('register.user');
-    Route::post('/register-user', [UserRegistrationController::class, 'store'])->name('register.user.store');
-});
 
+});
 
 
 

@@ -32,41 +32,42 @@
         </div>
     </form>
 
-    <!-- Appointment Report Table -->
-    <table class="table table-bordered">
-        <thead>
+<!-- Appointment Report Table -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Patient Name</th>
+            <th>Receptionist</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Reason</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse ($appointments as $appointment)
             <tr>
-                <th>#</th>
-                <th>Patient Name</th>
-                <th>Receptionist</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Reason</th>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $appointment->patient->user->name }}</td>
+                <td>{{ $appointment->reception->user->name }}</td>
+                <td>{{ $appointment->appointment_date }}</td>
+                <td>{{ $appointment->appointment_time }}</td>
+                <td>{{ ucfirst($appointment->status) }}</td>
+                <td>{{ $appointment->reason }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @forelse ($appointments as $appointment)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $appointment->patient->user->name }}</td>
-                    <td>{{ $appointment->reception->user->name }}</td>
-                    <td>{{ $appointment->appointment_date }}</td>
-                    <td>{{ $appointment->appointment_time }}</td>
-                    <td>{{ ucfirst($appointment->status) }}</td>
-                    <td>{{ $appointment->reason }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7" class="text-center">No appointments found.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+        @empty
+            <tr>
+                <td colspan="7" class="text-center">No appointments found.</td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-content-center">
-        {{ $appointments->links() }}
-    </div>
+<!-- Pagination -->
+<div class="d-flex justify-content-center">
+    {{ $appointments->links() }}
+</div>
+
 </div>
 @endsection

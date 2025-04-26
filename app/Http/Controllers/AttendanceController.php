@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
-use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -11,16 +11,13 @@ class AttendanceController extends Controller
 {
     /**
      * Display a listing of the attendances.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        $query = Attendance::with('staff.user');
+        $query = Attendance::with('user'); // changed staff to user
 
-        if ($request->has('staff_id')) {
-            $query->where('staff_id', $request->staff_id);
+        if ($request->has('user_id')) { // updated to user_id
+            $query->where('user_id', $request->user_id); // updated to user_id
         }
 
         if ($request->has('date')) {
@@ -29,19 +26,17 @@ class AttendanceController extends Controller
 
         $attendances = $query->orderBy('date', 'desc')->paginate(10);
 
-        return response()->json(['attendances' => $attendances]);
+        return view('admin.attendance.index', compact('attendances')); 
+
     }
 
     /**
      * Store a newly created attendance in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'staff_id' => 'required|exists:staff,id',
+            'user_id' => 'required|exists:users,id', // updated to user_id
             'date' => 'required|date',
             'check_in' => 'required|date_format:Y-m-d H:i:s',
             'check_out' => 'nullable|date_format:Y-m-d H:i:s|after:check_in',
@@ -52,69 +47,45 @@ class AttendanceController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $attendance = Attendance::create($request->only(['staff_id', 'date', 'check_in', 'check_out', 'status']));
+        $attendance = Attendance::create($request->only(['user_id', 'date', 'check_in', 'check_out', 'status'])); // updated to user_id
 
         return response()->json([
             'message' => 'Attendance recorded successfully',
-            'attendance' => $attendance->load('staff.user'),
+            'attendance' => $attendance->load('user'), // changed staff to user
         ], 201);
     }
 
     /**
      * Display the specified attendance.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($userid)
     {
-        $attendance = Attendance::with('staff.user')->findOrFail($id);
-        return response()->json(['attendance' => $attendance]);
+        $attendance = Attendance::with('user')->where('user_id', $userid)->latest()->firstOrFail();
+        return view('admin.attendance.show', compact('attendance'));
     }
 
-    /**
-     * Update the specified attendance in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+
+     // Show confirmation form
+
+     public function confirmForm(User $user)
     {
-        $attendance = Attendance::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'check_in' => 'sometimes|required|date_format:Y-m-d H:i:s',
-            'check_out' => 'nullable|date_format:Y-m-d H:i:s|after:check_in',
-            'status' => 'sometimes|required|in:present,absent,late,half_day',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $attendance->update($request->all());
-
-        return response()->json([
-            'message' => 'Attendance updated successfully',
-            'attendance' => $attendance->load('staff.user'),
-        ]);
+        return view('admin.attendance.confirm', compact('user'));
     }
 
-    /**
-     * Remove the specified attendance from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function confirm(Request $request, User $user)
     {
-        $attendance = Attendance::findOrFail($id);
-        $attendance->delete();
-
-        return response()->json([
-            'message' => 'Attendance deleted successfully',
-        ]);
+        // Process logic...
+    
+        $attendances = Attendance::with('user')->orderBy('date', 'desc')->paginate(10);
+    
+        return view('admin.attendance.index', compact('attendances'));
     }
+    
+
+    // Show attendance form
+  public function create()
+  {
+    $users = User::where('role', '!=', 'user')->get(); // or filter roles as needed
+    return view('admin.attendance.store', compact('users'));
+  }
 }
-

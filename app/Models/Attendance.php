@@ -15,7 +15,7 @@ class Attendance extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'staff_id',
+        'user_id',
         'date',
         'check_in',
         'check_out',
@@ -36,9 +36,9 @@ class Attendance extends Model
     /**
      * Get the staff that owns the attendance.
      */
-    public function staff()
+    public function user()
     {
-        return $this->belongsTo(Staff::class);
+        return $this->belongsTo(User::class);
     }
 }
 

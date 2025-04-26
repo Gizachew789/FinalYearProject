@@ -39,9 +39,17 @@ class InventoryController extends Controller
 
         $medications = $query->orderBy('name')->paginate(15);
 
-        return response()->json([
-            'medications' => $medications,
-        ]);
+        return view('admin.inventory.index', compact('medications'));
+    }
+
+    /**
+     * Show the form for creating a new medication.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('admin.inventory.create');
     }
 
     /**
@@ -65,15 +73,12 @@ class InventoryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $medication = Medication::create($request->all());
 
-        return response()->json([
-            'message' => 'Medication created successfully',
-            'medication' => $medication,
-        ], 201);
+        return redirect()->route('inventory.index')->with('success', 'Medication added successfully');
     }
 
     /**
@@ -85,7 +90,19 @@ class InventoryController extends Controller
     public function show($id)
     {
         $medication = Medication::findOrFail($id);
-        return response()->json(['medication' => $medication]);
+        return view('admin.inventory.show', compact('medication'));
+    }
+
+    /**
+     * Show the form for editing the specified medication.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $medication = Medication::findOrFail($id);
+        return view('admin.inventory.edit', compact('medication'));
     }
 
     /**
@@ -111,15 +128,12 @@ class InventoryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $medication->update($request->all());
 
-        return response()->json([
-            'message' => 'Medication updated successfully',
-            'medication' => $medication,
-        ]);
+        return redirect()->route('inventory.index')->with('success', 'Medication updated successfully');
     }
 
     /**
@@ -133,9 +147,7 @@ class InventoryController extends Controller
         $medication = Medication::findOrFail($id);
         $medication->delete();
 
-        return response()->json([
-            'message' => 'Medication deleted successfully',
-        ]);
+        return redirect()->route('inventory.index')->with('success', 'Medication deleted successfully');
     }
 
     /**
@@ -156,15 +168,13 @@ class InventoryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $medication = Medication::findOrFail($id);
 
         if ($request->transaction_type === 'out' && $medication->current_stock < $request->quantity) {
-            return response()->json([
-                'message' => 'Insufficient stock available',
-            ], 400);
+            return redirect()->back()->with('error', 'Insufficient stock available');
         }
 
         DB::transaction(function () use ($request, $medication) {
@@ -189,32 +199,7 @@ class InventoryController extends Controller
             }
         });
 
-        return response()->json([
-            'message' => 'Stock updated successfully',
-            'medication' => $medication->fresh(),
-        ]);
-    }
-
-    /**
-     * Get inventory transactions for a medication.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function transactions(Request $request, $id)
-    {
-        $medication = Medication::findOrFail($id);
-
-        $transactions = InventoryTransaction::where('medication_id', $id)
-            ->with('performedBy:id,name')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return response()->json([
-            'medication' => $medication,
-            'transactions' => $transactions,
-        ]);
+        return redirect()->route('inventory.index')->with('success', 'Stock updated successfully');
     }
 
     /**
@@ -228,9 +213,7 @@ class InventoryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return response()->json([
-            'low_stock_medications' => $lowStockMedications,
-        ]);
+        return view('admin.inventory.lowStock', compact('lowStockMedications'));
     }
 
     /**
@@ -253,4 +236,3 @@ class InventoryController extends Controller
         }
     }
 }
-

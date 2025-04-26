@@ -57,6 +57,9 @@ class Appointment extends Model
     {
         return $this->hasOne(MedicalRecord::class);
     }
+
+    public function reception()
+ {
+    return $this->belongsTo(User::class, 'reception_id');
+ }
 }
-
-

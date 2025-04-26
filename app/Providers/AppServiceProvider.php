@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,16 +11,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // You can register services or bindings here if needed.
     }
 
     /**
      * Bootstrap any application services.
      */
-    public function boot()
+    public function boot(): void
     {
-        Inertia::share([
-            // global props like auth user, flash messages, etc.
-        ]);
+        // Place code here for bootstrapping Blade components, view composers, etc., if needed.
     }
 }

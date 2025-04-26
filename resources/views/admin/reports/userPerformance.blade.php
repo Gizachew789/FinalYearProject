@@ -46,7 +46,7 @@
                 <th>Medical Records Created</th>
                 <th>Prescriptions Issued</th>
             </tr>
-        </thead>
+        </thead>   
         <tbody>
             @forelse ($performanceData as $data)
                 <tr>

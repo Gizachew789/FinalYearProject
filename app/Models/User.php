@@ -7,18 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable; // Added HasApiTokens if API auth is used
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'id',
         'name',
         'email',
         'password',
@@ -29,124 +22,81 @@ class User extends Authenticatable implements MustVerifyEmail
         'status',
     ];
 
-    public function setPasswordAttribute($value)
-          {
-     $this->attributes['password'] = $value; // Storing plain text ❌
-      }
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 
-    /**
-     * Get the patient associated with the user.
-     */
+    public function setPasswordAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['password'] = bcrypt($value);
+        }
+    }
+
+    // Role check methods
+    public function isAdmin()
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function isHealthOfficer()
+    {
+        return $this->role === 'Health_Officer';
+    }
+
+    public function isReception()
+    {
+        return $this->role === 'Reception';
+    }
+
+    public function isLabTechnician()
+    {
+        return $this->role === 'Lab_Technician';
+    }
+
+    public function isPharmacist()
+    {
+        return $this->role === 'Pharmacist';
+    }
+
+    public function isPatient()
+    {
+        return $this->role === 'Patient';
+    }
+
+    // Relationships
     public function patient()
     {
         return $this->hasOne(Patient::class);
     }
 
-    /**
-     * Get the physician associated with the user.
-     */
     public function healthOfficer()
     {
-        return $this->hasOne(healthOfficer::class);
+        return $this->hasOne(HealthOfficer::class); // Capitalize class name properly
     }
 
-    /**
-     * Get the reception associated with the user.
-     */
     public function reception()
     {
         return $this->hasOne(Reception::class);
     }
 
-    /**
-     * Get the lab technician associated with the user.
-     */
     public function labTechnician()
     {
         return $this->hasOne(LabTechnician::class);
     }
 
-    /**
-     * Get the pharmacist associated with the user.
-     */
     public function pharmacist()
     {
         return $this->hasOne(Pharmacist::class);
     }
 
-    /**
-     * Get the admin associated with the user.
-     */
     public function admin()
     {
         return $this->hasOne(Admin::class);
     }
-
-    /**
-     * Check if the user is an admin.
-     */
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-
-    /**
-     * Check if the user is a physician.
-     */
-    public function ishealthOfficer()
-    {
-        return $this->role === 'healthOfficer';
-    }
-
-    /**
-     * Check if the user is a patient.
-     */
-    public function isPatient()
-    {
-        return $this->role === 'patient';
-    }
-
-    /**
-     * Check if the user is a reception.
-     */
-    public function isReception()
-    {
-        return $this->role === 'reception';
-    }
-
-    /**
-     * Check if the user is a lab technician.
-     */
-    public function isLabTechnician()
-    {
-        return $this->role === 'lab_technician';
-    }
-
-    /**
-     * Check if the user is a pharmacist.
-     */
-    public function isPharmacist()
-    {
-        return $this->role === 'pharmacist';
-    }
 }
-

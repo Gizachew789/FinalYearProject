@@ -18,6 +18,7 @@
 </head>
 <body>
     <div id="app">
+        <!-- Header -->
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
@@ -30,7 +31,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
-
+                        <!-- You can add more links here if needed -->
                     </ul>
 
                     <!-- Right Side Of Navbar --> 
@@ -64,16 +65,22 @@
             </div>
         </nav>
 
+        <!-- Main Content -->
         <main class="py-4">
             @yield('content')
         </main>
+        
+        <!-- Footer -->
+        <footer class="bg-dark text-white text-center py-4">
+            <div class="container">
+                <p>&copy; {{ date('Y') }} {{ config('app.name', 'Student Clinic Management System') }}. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
 
     <!-- Scripts -->
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>
-

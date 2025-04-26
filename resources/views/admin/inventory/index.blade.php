@@ -30,9 +30,12 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $medication->name }}</td>
                     <td>{{ $medication->category }}</td>
+                    <td>{{ $medication->unit }}</td>
                     <td>{{ $medication->current_stock }}</td>
                     <td>{{ $medication->reorder_level }}</td>
-                    <td>${{ number_format($medication->price, 2) }}</td>
+                    <td>{{ $medication->price }}</td>
+                    <td>{{ $medication->expiry_date }}</td>
+                    <td>{{ $medication->manufacturer }}</td>
                     <td>
                         <a href="{{ route('admin.inventory.show', $medication->id) }}" class="btn btn-info btn-sm">View</a>
                         <a href="{{ route('admin.inventory.edit', $medication->id) }}" class="btn btn-warning btn-sm">Edit</a>

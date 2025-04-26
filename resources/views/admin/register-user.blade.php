@@ -8,7 +8,7 @@
         <div class="mb-4 text-green-600">{{ session('success') }}</div>
     @endif
 
-    <form action="{{ route('admin.register.user.store') }}" method="POST">
+    <form method="POST" action="{{ route('admin.register.user.store') }}">
 
         @csrf
 
@@ -43,7 +43,7 @@
             </select>
         </div>
 
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Register</button>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Register</button>
     </form>
 </div>
 @endsection

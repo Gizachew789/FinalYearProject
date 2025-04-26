@@ -1,36 +1,39 @@
-<?php
+<?php 
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateInventoryTransactionsTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        if (!Schema::hasTable('inventory_transaction')) {
-            Schema::create('inventory_transaction', function (Blueprint $table) {
-                $table->id(); // Primary key
-                $table->string('item_name', 100); // Name of the inventory item
-                $table->unsignedBigInteger('category_id'); // Foreign key for category
-                $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade'); // Cascade on delete
-                $table->enum('unit', ['pcs', 'boxes', 'vials', 'liters', 'kg'])->default('pcs'); // Unit of measurement
-                $table->unsignedInteger('quantity'); // Quantity in stock
-                $table->text('description')->nullable(); // Optional description
-                $table->date('expiry_date')->nullable(); // Expiry date for items like medications
-                $table->timestamps(); // Created and updated timestamps
-            });
-        }
+        Schema::create('inventory_transactions', function (Blueprint $table) {
+            $table->id(); // Auto-increment primary key
+            $table->foreignId('medication_id')->constrained('medications')->onDelete('cascade'); // Foreign key to medications table
+            $table->integer('quantity'); // Quantity of the transaction
+            $table->enum('transaction_type', ['in', 'out']); // Whether it's an "in" (addition) or "out" (deduction) transaction
+            $table->date('transaction_date'); // Date when the transaction occurred
+            $table->string('reason'); // Reason for the transaction (e.g., restock, sale, etc.)
+            $table->string('batch_number')->nullable(); // Batch number (optional)
+            $table->date('expiry_date')->nullable(); // Expiry date for the batch (optional)
+            $table->foreignId('performed_by')->constrained('users')->onDelete('set null'); // Foreign key to users table (who performed the transaction)
+            $table->timestamps(); // Created at and updated at timestamps
+        });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('inventory_transaction');
+        Schema::dropIfExists('inventory_transactions');
     }
-};
+}

@@ -1,26 +1,18 @@
-<?php
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1>Edit Inventory Item</h1>
-    <form method="POST" action="{{ route('admin.inventory.update', $item->id) }}">
-        @csrf
-        @method('PUT')
-        <!-- Add form fields for inventory editing -->
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $item->name) }}" required>
-        </div>
-        <div class="form-group">
-            <label for="quantity">Quantity</label>
-            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity', $item->quantity) }}" required>
-        </div>
-        <div class="form-group">
-            <label for="price">Price</label>
-            <input type="text" class="form-control" id="price" name="price" value="{{ old('price', $item->price) }}" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Update</button>
-    </form>
-</div>
+<h2>Edit Medication</h2>
+
+<form method="POST" action="{{ route('admin.inventory.update', $medication->id) }}">
+    @csrf
+    @method('PUT')
+    <input type="text" name="name" value="{{ $medication->name }}" required>
+    <input type="text" name="category" value="{{ $medication->category }}" required>
+    <input type="text" name="unit" value="{{ $medication->unit }}" required>
+    <input type="number" name="reorder_level" value="{{ $medication->reorder_level }}" required>
+    <input type="number" name="price" value="{{ $medication->price }}" step="0.01" required>
+    <input type="date" name="expiry_date" value="{{ $medication->expiry_date ? date('Y-m-d', strtotime($medication->expiry_date)) : '' }}">
+    <input type="text" name="manufacturer" value="{{ $medication->manufacturer }}">
+    <button type="submit">Update</button>
+</form>
 @endsection

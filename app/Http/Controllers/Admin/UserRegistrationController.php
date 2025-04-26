@@ -14,22 +14,39 @@ class UserRegistrationController extends Controller
         return view('admin.register-user');
     }
 
+
+
+
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'role' => 'required|string', // Example: 'receptionist', 'pharmacist', etc.
-        ]);
+ {
+    
+    // dd($request->all()); // TEMP: Use this to debug
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'password' => Hash::make($request->password),
-        ]);
+     $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'age' => 'nullable|integer',
+        'gender' => 'nullable|in:male,female',
+        'phone' => 'nullable|string|max:20',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|string|min:8|confirmed',
+        'role' => 'nullable|in:admin,reception,pharmacist,lab_technician,health_Officer,Bsc_Nurse',
+    ]);
 
-        return redirect()->route('admin.register-user')->with('success', 'User registered successfully!');
-    }
+   User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => bcrypt($validated['password']),
+        'age' => $validated['age'],
+        'gender' => $validated['gender'],
+        'phone' => $validated['phone'],
+        'role' => $validated['role'],
+    ]);
+
+
+
+    return redirect()->route('admin.dashboard')->with('success', 'User registered successfully!');
 }
+
+
+ }
+

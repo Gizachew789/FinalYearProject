@@ -34,7 +34,21 @@
                                     'title' => 'Appointment Reports',
                                     'text' => 'View and generate reports related to appointments.',
                                     'route' => route('admin.reports.appointments'),
-                                    'button' => 'View Appointment Reports',
+                                    'button' => 'Generate Appointment Reports',
+                                    'class' => 'btn-info'
+                                ],
+                                [
+                                    'title' => 'Inventory Reports',
+                                    'text' => 'View and generate reports related to inventory.',
+                                    'route' => route('admin.reports.inventory'),
+                                    'button' => 'Generate Inventory Reports',
+                                    'class' => 'btn-info'
+                                ],
+                                [
+                                    'title' => 'Staff Performance Reports',
+                                    'text' => 'View and generate reports related to staff performance.',
+                                    'route' => route('admin.reports.userPerformance'),
+                                    'button' => 'Generate Staff Performance Reports',
                                     'class' => 'btn-info'
                                 ],
                                 [
@@ -45,10 +59,10 @@
                                     'class' => 'btn-warning'
                                 ],
                                 [
-                                    'title' => 'Reception Management',
+                                    'title' => 'Attendance Management',
                                     'text' => 'Manage reception-related tasks and patient registrations.',
-                                    'route' => route('reception.register.patient'),
-                                    'button' => 'Reception Management',
+                                    'route' => route('admin.attendance.index'),
+                                    'button' => 'Attendance Management',
                                     'class' => 'btn-secondary'
                                 ],
                             ];

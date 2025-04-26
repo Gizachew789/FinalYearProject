@@ -17,6 +17,6 @@
     </div>
 
     <a href="{{ route('admin.users.index') }}" class="btn btn-secondary mt-3">Back to Users</a>
-    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-primary mt-3">Edit User</a>
+    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-primary mt-3">Edit User</a>
 </div>
 @endsection

@@ -9,7 +9,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all(); // Retrieve all users
+        $users = User::paginate(10); // Retrieve all users
         return view('admin.users.index', compact('users'));
     }
 
@@ -25,8 +25,18 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $user->update($request->all()); // Update user info
-        return redirect()->route('admin.users.index');
+        // Validate the incoming request
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,  // Allow current user email to be unchanged
+            'role' => 'required|in:Admin,Reception,Pharmacist,Lab_Technician,Health_Officer,Nurse',
+        ]);
+    
+        // Update the user info with validated data
+        $user->update($validated);
+    
+        // Redirect back to the users list
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully!');
     }
 
     public function destroy(User $user)

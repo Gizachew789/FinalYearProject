@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\Appointment;
+use App\Models\User;
+use App\Models\Medication;
+use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+
 
 class ReportController extends Controller
 {
@@ -25,42 +30,30 @@ class ReportController extends Controller
                 'message' => 'Unauthorized',
             ], 403);
         }
-
+    
         // Date range filter
         $startDate = $request->input('start_date', now()->subMonth());
         $endDate = $request->input('end_date', now());
-
-        // Appointments by status
-        $appointmentsByStatus = Appointment::whereBetween('appointment_date', [$startDate, $endDate])
-            ->select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->get();
-
-        // Appointments by reception
-        $appointmentsByReception = Appointment::whereBetween('appointment_date', [$startDate, $endDate])
-            ->select('reception_id', DB::raw('count(*) as total_appointments'))
-            ->groupBy('reception_id')
-            ->with('reception.user:id,name')
-            ->get();
-
-        // Appointments by day of week
-        $appointmentsByDay = Appointment::whereBetween('appointment_date', [$startDate, $endDate])
-            ->select(DB::raw('DAYNAME(appointment_date) as day'), DB::raw('count(*) as count'))
-            ->groupBy('day')
-            ->orderByRaw('FIELD(day, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")')
-            ->get();
-
-        return response()->json([
-            'by_status' => $appointmentsByStatus,
-            'by_reception' => $appointmentsByReception,
-            'by_day' => $appointmentsByDay,
-            'date_range' => [
-                'start_date' => $startDate,
-                'end_date' => $endDate
-            ]
-        ]);
+        
+        // Status filter (if provided)
+        $statusFilter = $request->input('status');
+    
+        // Appointments query with date range and status filter
+        $appointmentsQuery = Appointment::whereBetween('appointment_date', [$startDate, $endDate]);
+    
+        if ($statusFilter) {
+            $appointmentsQuery->where('status', $statusFilter);
+        }
+    
+        // Fetching the appointments with pagination and related data
+        $appointments = $appointmentsQuery->with('patient', 'reception') // Ensure relationships are defined correctly in models
+            ->orderBy('appointment_date', 'desc')
+            ->paginate(10);
+    
+        // Return the view with the appointments data
+        return view('admin.reports.appointments', compact('appointments'));
     }
-
+    
     /**
      * Generate inventory reports.
      *
@@ -243,28 +236,43 @@ class ReportController extends Controller
      */
     private function generateAppointmentReportData(Request $request)
     {
-        $startDate = $request->input('start_date', now()->subMonth());
-        $endDate = $request->input('end_date', now());
-
+        // Get date range from request or default to last month to today
+        $startDate = $request->input('start_date', now()->subMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+    
+        // Fetch appointments within the date range
         $appointments = Appointment::whereBetween('appointment_date', [$startDate, $endDate])
-            ->with(['patient.user', 'reception.user'])
+            ->with(['patient.user', 'reception.user']) // Eager load patient and reception users
             ->get();
-
+    
+        // Prepare the data for the report
         $data = [];
         foreach ($appointments as $appointment) {
+            // Handle cases where relations might be missing (e.g., optional relationships)
             $data[] = [
                 'ID' => $appointment->id,
-                'Patient' => $appointment->patient->user->name,
-                'Reception' => $appointment->reception->user->name,
+                'Patient' => optional($appointment->patient->user)->name ?? 'N/A',
+                'Reception' => optional($appointment->reception->user)->name ?? 'N/A',
                 'Date' => $appointment->appointment_date,
                 'Time' => $appointment->appointment_time,
-                'Status' => $appointment->status,
+                'Status' => ucfirst($appointment->status),  // Capitalize status
                 'Reason' => $appointment->reason,
             ];
         }
-
+    
         return $data;
     }
+
+
+       public function generateAppointmentReport(Request $request)
+   {
+     $reportData = $this->generateAppointmentReportData($request);
+
+     // Process or export the data (e.g., to CSV, Excel, etc.)
+     // Return the data to the view, or initiate file download
+     return view('admin.reports.appointment_report', compact('reportData'));
+  }
+    
 
     /**
      * Generate inventory report data for export.

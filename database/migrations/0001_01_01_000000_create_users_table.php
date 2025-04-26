@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role',['admin', 'reception', 'pharmacist', 'lab_technician', 'health_Officer', 'Bsc_Nurse'])->default('admin');
+            $table->enum('role',['Admin', 'Reception', 'Pharmacist', 'Lab_Technician', 'Health_Officer', 'Nurse'])->default('Admin');
             $table->rememberToken();
            $table->timestamps();
         });
