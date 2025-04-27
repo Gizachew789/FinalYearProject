@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use \App\Mail\NewUserPasswordMail;
 
 class UserRegistrationController extends Controller
 {
@@ -13,10 +15,6 @@ class UserRegistrationController extends Controller
     {
         return view('admin.register-user');
     }
-
-
-
-
     public function store(Request $request)
  {
     
@@ -25,28 +23,31 @@ class UserRegistrationController extends Controller
      $validated = $request->validate([
         'name' => 'required|string|max:255',
         'age' => 'nullable|integer',
-        'gender' => 'nullable|in:male,female',
+        'gender' => 'required|in:male,female',
         'phone' => 'nullable|string|max:20',
+        'status' => 'nullable|in:active,inactive',
         'email' => 'required|email|unique:users,email',
-        'password' => 'required|string|min:8|confirmed',
-        'role' => 'nullable|in:admin,reception,pharmacist,lab_technician,health_Officer,Bsc_Nurse',
+        'role' => 'required|in:admin,reception,pharmacist,lab_technician,health_Officer,Bsc_Nurse',
     ]);
+
+    $randomPassword = \Str::random(10);
 
    User::create([
         'name' => $validated['name'],
-        'email' => $validated['email'],
-        'password' => bcrypt($validated['password']),
         'age' => $validated['age'],
         'gender' => $validated['gender'],
         'phone' => $validated['phone'],
+        'status' => $validated['status'],
+        'email' => $validated['email'],
+        'password' => $randomPassword, // will be auto-hashed by your model's setPasswordAttribute()
         'role' => $validated['role'],
     ]);
 
+    $user = User::where('email', $validated['email'])->first();
 
-
+    Mail::to($user->email)->send(new NewUserPasswordMail($randomPassword));
     return redirect()->route('admin.dashboard')->with('success', 'User registered successfully!');
-}
-
+  }
 
  }
 

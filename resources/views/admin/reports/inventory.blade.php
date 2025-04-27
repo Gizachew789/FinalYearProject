@@ -52,7 +52,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($medications as $medication)
+            @forelse ($low_stock as $medication)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $medication->name }}</td>
@@ -65,15 +65,34 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="text-center">No inventory items found.</td>
+                    <td colspan="8" class="text-center">No low stock items found.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
+    <!-- Most Used Medications Report -->
+    <h3>Most Used Medications (from {{ \Carbon\Carbon::parse($date_range['start_date'])->format('Y-m-d') }} to {{ \Carbon\Carbon::parse($date_range['end_date'])->format('Y-m-d') }})</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Total Used</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($most_used as $used)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $used->medication->name ?? 'Unknown Medication' }}</td>
+                    <td>{{ $used->total_used }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
     <!-- Pagination -->
-    <div class="d-flex justify-content-center">
-        {{ $medications->links() }}
-    </div>
+
 </div>
 @endsection

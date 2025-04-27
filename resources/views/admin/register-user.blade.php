@@ -9,7 +9,6 @@
     @endif
 
     <form method="POST" action="{{ route('admin.register.user.store') }}">
-
         @csrf
 
         <div class="mb-4">
@@ -17,25 +16,42 @@
             <input type="text" name="name" class="w-full border p-2 rounded" required>
         </div>
 
+         <div class="mb-4">
+            <label>Age</label>
+            <input type="number" name="age" class="w-full border p-2 rounded">
+        </div>
+
+        <div class="mb-4">
+             <label>Gender</label>
+              <select name="gender" class="w-full border p-2 rounded" required>
+               <option value="male">Male</option>
+               <option value="female">Female</option>
+              </select>
+        </div>
+
+        <div class="mb-4">
+            <label>Phone</label>
+               <input type="text" name="phone" class="w-full border p-2 rounded">
+         </div>
+
+          <div class="mb-4">
+              <label>Status</label>
+             <select name="status" class="w-full border p-2 rounded">
+               <option value="active" selected>Active</option>
+                  <option value="inactive">Inactive</option>
+             </select>
+              </div>
+
+
         <div class="mb-4">
             <label>Email</label>
             <input type="email" name="email" class="w-full border p-2 rounded" required>
         </div>
 
         <div class="mb-4">
-            <label>Password</label>
-            <input type="password" name="password" class="w-full border p-2 rounded" required>
-        </div>
-
-        <div class="mb-4">
-            <label>Confirm Password</label>
-            <input type="password" name="password_confirmation" class="w-full border p-2 rounded" required>
-        </div>
-
-        <div class="mb-4">
             <label>Role</label>
             <select name="role" class="w-full border p-2 rounded" required>
-                <option value="receptionist">Receptionist</option>
+                <option value="reception">Receptionist</option>
                 <option value="pharmacist">Pharmacist</option>
                 <option value="lab_technician">Lab Technician</option>
                 <option value="nurse">Nurse</option>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Student Clinic Management System') }}</title>
+    <title>{{ config('app.name', 'BiT Students Clinic') }}</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -22,7 +22,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Student Clinic Management System') }}
+                    {{ config('app.name', 'BiT Students Clinic') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -73,7 +73,7 @@
         <!-- Footer -->
         <footer class="bg-dark text-white text-center py-4">
             <div class="container">
-                <p>&copy; {{ date('Y') }} {{ config('app.name', 'Student Clinic Management System') }}. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} {{ config('app.name', 'BiT Students Clinic') }}. All rights reserved.</p>
             </div>
         </footer>
     </div>

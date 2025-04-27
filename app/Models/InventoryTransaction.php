@@ -19,7 +19,7 @@ class InventoryTransaction extends Model
         'inventory_name',
         'inventory_type',
         'description',
-        //'medication_id',
+        'medication_id',
         'transaction_type', // in, out
         'quantity',
         'transaction_date',

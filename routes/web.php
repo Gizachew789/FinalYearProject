@@ -53,6 +53,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Reports management
+    
        // Appointment Reports
        Route::get('/reports/appointments', [ReportController::class, 'appointmentReports'])
        ->name('reports.appointments'); // Generate appointment reports (by status, reception, day)

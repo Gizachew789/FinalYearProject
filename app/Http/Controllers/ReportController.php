@@ -70,7 +70,6 @@ class ReportController extends Controller
                 'message' => 'Unauthorized',
             ], 403);
         }
-
         // Date range filter
         $startDate = $request->input('start_date', now()->subMonth());
         $endDate = $request->input('end_date', now());
@@ -79,6 +78,13 @@ class ReportController extends Controller
         $lowStockMedications = Medication::whereRaw('current_stock <= reorder_level')
             ->orderBy('current_stock')
             ->get();
+
+                // Prescriber-based data
+                   $prescriberData = DB::table('prescriptions')
+                    ->select('prescriber_id', DB::raw('count(*) as count'))
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->groupBy('prescriber_id')
+                    ->get();
 
         // Most used medications
         $mostUsedMedications = InventoryTransaction::whereBetween('transaction_date', [$startDate, $endDate])
@@ -90,14 +96,19 @@ class ReportController extends Controller
             ->limit(10)
             ->get();
 
+            $categories = Medication::select('category')->distinct()->pluck('category');
+            $medications = Medication::all();
 
-        return response()->json([
+        return view('admin.reports.inventory', [
             'low_stock' => $lowStockMedications,
             'most_used' => $mostUsedMedications,
             'date_range' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate
-            ]
+            ],
+            'prescriber_data' => $prescriberData,
+            'categories' => $categories, 
+            'medications' => $medications, 
         ]);
     }
 
@@ -110,18 +121,18 @@ class ReportController extends Controller
     public function userPerformanceReports(Request $request)
     {
         $user = $request->user();
-        
+    
         // Only admin and users can access this
         if (!$user->isAdmin() && !$user->isUser()) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 403);
         }
-
+    
         // Date range filter
         $startDate = $request->input('start_date', now()->subMonth());
         $endDate = $request->input('end_date', now());
-
+    
         // Appointments completed by reception
         $appointmentsByReception = Appointment::whereBetween('appointment_date', [$startDate, $endDate])
             ->select(
@@ -131,33 +142,41 @@ class ReportController extends Controller
                 DB::raw('SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled_appointments')
             )
             ->groupBy('reception_id')
-            ->with('reception.user:id,name')
+            ->with('reception.user:id,name') // Ensure you're fetching the user data for reception
             ->get();
-
+    
         // Medical records created by user
         $medicalRecordsByUser = DB::table('medical_records')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select('created_by', DB::raw('count(*) as count'))
             ->groupBy('created_by')
             ->get();
-
+    
         // Prescriptions by user
         $prescriptionsByUser = DB::table('prescriptions')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->select('prescribed_by', DB::raw('count(*) as count'))
-            ->groupBy('prescribed_by')
+            ->select('prescriber_id', DB::raw('count(*) as count'))
+            ->groupBy('prescriber_id')
             ->get();
-
-        return response()->json([
+    
+        // Fetch users for the performance reports (if you want to show them in the report)
+        $users = User::whereIn('id', $appointmentsByReception->pluck('reception_id') // Collect reception_ids
+            ->merge($medicalRecordsByUser->pluck('created_by')) // Collect created_by from medical records
+            ->merge($prescriptionsByUser->pluck('prescriber_id'))) // Collect prescriber_ids from prescriptions
+            ->get();
+    
+        return view('admin.reports.user_performance', [
             'appointments' => $appointmentsByReception,
             'medical_records' => $medicalRecordsByUser,
             'prescriptions' => $prescriptionsByUser,
             'date_range' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate
-            ]
+            ],
+            'users' => $users // Pass the users data to the view
         ]);
     }
+    
 
     /**
      * Export report as CSV or PDF.

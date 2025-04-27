@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prescription_items', function (Blueprint $table) {
+        Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('prescriber_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('prescribed_id')->constrained('patients')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
             $table->foreignId('medication_id')->constrained('inventory')->onDelete('cascade');
             $table->string('dosage')->notNullable();
             $table->string('frequency')->notNullable();
             $table->string('duration')->notNullable();
             $table->text('instructions')->notNullable();
             $table->integer('quantity')->default(1);
-            $table->enum('status', ['prescribed', 'dispensed', 'cancelled'])->default('prescribed');
+            $table->enum('status', ['confirmeed', 'waiting', 'cancelled'])->default('waiting');
             $table->timestamps();
         });
     }
@@ -31,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prescription_items');
+        Schema::dropIfExists('prescriptions');
     }
 };
 

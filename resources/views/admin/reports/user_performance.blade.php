@@ -48,27 +48,28 @@
             </tr>
         </thead>   
         <tbody>
-            @forelse ($performanceData as $data)
+            @foreach ($users as $user)
+                @php
+                    // Filter data for the current user
+                    $appointmentsForUser = $appointments->firstWhere('reception_id', $user->id);
+                    $medicalRecordsForUser = $medical_records->firstWhere('created_by', $user->id);
+                    $prescriptionsForUser = $prescriptions->firstWhere('prescriber_id', $user->id);
+                @endphp
+
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $data['user_name'] }}</td>
-                    <td>{{ $data['total_appointments'] }}</td>
-                    <td>{{ $data['completed_appointments'] }}</td>
-                    <td>{{ $data['cancelled_appointments'] }}</td>
-                    <td>{{ $data['medical_records_created'] }}</td>
-                    <td>{{ $data['prescriptions_issued'] }}</td>
+                    <td>{{ $user->name }}</td>
+                    <td>{{ $appointmentsForUser ? $appointmentsForUser->total_appointments : 0 }}</td>
+                    <td>{{ $appointmentsForUser ? $appointmentsForUser->completed_appointments : 0 }}</td>
+                    <td>{{ $appointmentsForUser ? $appointmentsForUser->cancelled_appointments : 0 }}</td>
+                    <td>{{ $medicalRecordsForUser ? $medicalRecordsForUser->count : 0 }}</td>
+                    <td>{{ $prescriptionsForUser ? $prescriptionsForUser->count : 0 }}</td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="7" class="text-center">No performance data found.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 
     <!-- Pagination -->
-    <div class="d-flex justify-content-center">
-        {{ $performanceData->links() }}
-    </div>
+
 </div>
 @endsection

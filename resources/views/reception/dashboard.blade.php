@@ -13,9 +13,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    
-                    {{-- Optional: Hide Blade-based buttons if you're using React for everything --}}
-                    {{-- Or keep them as fallback UI --}}
+                
                     <div class="row mt-4">
                         <div class="col-md-4 mb-4">
                             <div class="card">
@@ -45,16 +43,9 @@
                             </div>
                         </div>
                     </div>
-
-                    {{-- 👇 React will render inside this div --}}
-                    <div id="reception-root"></div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-
-@viteReactRefresh
-@vite('resources/js/app.jsx')
