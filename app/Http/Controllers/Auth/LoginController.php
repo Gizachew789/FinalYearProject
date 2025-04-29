@@ -36,34 +36,27 @@ class LoginController extends Controller
 
         // Attempt to find the user by email
         $user = User::where('email', $request->email)->first();
-        
 
         // Check if the user exists and the password is correct
         if ($user && Hash::check($request->password, $user->password)) {
-         
             // Log the user in
             Auth::login($user);
 
+            // Redirect based on user's role
             if ($user->role == 'Admin') {
                 return redirect()->route('admin.dashboard')->with('message', 'Login successful');
-             }
-            // elseif ($user->role == 'reception') {
-            //     return redirect()->route('reception.dashboard')->with('message', 'Login successful');
-            // } elseif ($user->role == 'physician') {
-            //     return redirect()->route('physician.dashboard')->with('message', 'Login successful');
-            // } elseif ($user->role == 'lab_technician') {
-            //     return redirect()->route('lab.dashboard')->with('message', 'Login successful');
-            // } elseif ($user->role == 'pharmacist') {
-            //     return redirect()->route('pharmacist.dashboard')->with('message', 'Login successful');
-            // } elseif ($user->role == 'patient') {
-            //     return redirect()->route('patient.dashboard')->with('message', 'Login successful');
-                
-            // }
-
-            // Redirect based on the user's role
-            // return $this->redirectBasedOnRole($user);
+            } elseif ($user->role == 'Reception') {
+                return redirect()->route('reception.dashboard')->with('message', 'Login successful');
+            } elseif ($user->role == 'Physician') {
+                return redirect()->route('physician.dashboard')->with('message', 'Login successful');
+            } elseif ($user->role == 'Lab_Technician') {
+                return redirect()->route('lab.dashboard')->with('message', 'Login successful');
+            } elseif ($user->role == 'Pharmacist') {
+                return redirect()->route('pharmacist.dashboard')->with('message', 'Login successful');
+            } elseif ($user->role == 'Patient') {
+                return redirect()->route('patient.dashboard')->with('message', 'Login successful');
+            }
         }
-
 
         // Redirect back with an error if credentials are invalid
         return redirect()->route('login')->withErrors([
@@ -72,26 +65,26 @@ class LoginController extends Controller
     }
 
     /**
-     * Redirect the user based on their role.
+     * Redirect the user based on their role after authentication.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function authenticated($request, $user)
+    protected function authenticated(Request $request, $user)
     {
-        if ($user->role == 'admin') {
+        if ($user->role == 'Admin') {
             return redirect()->route('admin.dashboard')->with('message', 'Login successful');
-        } elseif ($user->role == 'reception') {
+        } elseif ($user->role == 'Reception') {
             return redirect()->route('reception.dashboard')->with('message', 'Login successful');
-        } elseif ($user->role == 'physician') {
+        } elseif ($user->role == 'Physician') {
             return redirect()->route('physician.dashboard')->with('message', 'Login successful');
-        } elseif ($user->role == 'lab_technician') {
+        } elseif ($user->role == 'Lab_Technician') {
             return redirect()->route('lab.dashboard')->with('message', 'Login successful');
-        } elseif ($user->role == 'pharmacist') {
+        } elseif ($user->role == 'Pharmacist') {
             return redirect()->route('pharmacist.dashboard')->with('message', 'Login successful');
-        } elseif ($user->role == 'patient') {
+        } elseif ($user->role == 'Patient') {
             return redirect()->route('patient.dashboard')->with('message', 'Login successful');
-            
         }
     }
 
