@@ -22,8 +22,6 @@ class Patient extends Model
         'gender',
         'age',
         'phone number', 
-        // 'emergency_contact_name',
-        // 'emergency_contact_phone',
         'department',
         'year_of_study',
         'blood_group',
@@ -35,7 +33,7 @@ class Patient extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'email' => 'email',
+        'email' => 'string',
     ];
 
     /**

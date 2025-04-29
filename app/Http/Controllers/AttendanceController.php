@@ -6,6 +6,8 @@ use App\Models\Attendance;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 class AttendanceController extends Controller
 {
@@ -26,7 +28,10 @@ class AttendanceController extends Controller
 
         $attendances = $query->orderBy('date', 'desc')->paginate(10);
 
-        return view('admin.attendance.index', compact('attendances')); 
+           $user = Auth::user(); // or however you want to get the user
+         return view('admin.attendance.index', compact('attendances', 'user'));
+
+
 
     }
 

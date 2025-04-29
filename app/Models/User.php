@@ -33,10 +33,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function setPasswordAttribute($value)
     {
-        if ($value) {
+        if (!empty($value) && !\Illuminate\Support\Str::startsWith($value, '$2y$')) {
             $this->attributes['password'] = bcrypt($value);
+        } else {
+            $this->attributes['password'] = $value;
         }
     }
+    
 
     // Role check methods
     public function isAdmin()

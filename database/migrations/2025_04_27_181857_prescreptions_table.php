@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('prescriber_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
-            $table->foreignId('medication_id')->constrained('inventory')->onDelete('cascade');
+            $table->foreignId('medication_id')->constrained('inventory_transactions')->onDelete('cascade');
             $table->string('dosage')->notNullable();
             $table->string('frequency')->notNullable();
             $table->string('duration')->notNullable();

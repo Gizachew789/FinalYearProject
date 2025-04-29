@@ -27,13 +27,13 @@
                         <td>{{ $attendance->status }}</td>
                     </tr>
                 @endforeach
-            </tbody>
+            </tbody> 
         </table>
 
         <!-- Pagination links -->
         <div>
         <a href="{{ route('admin.attendance.create') }}" class="btn btn-primary">Add Attendance</a>
-        <a href="{{ route('admin.attendance.confirm', $attendance->user->id) }}" class="btn btn-success">Confirm Attendance</a>
+        <a href="{{ route('admin.attendance.confirm', $user->id) }}" class="btn btn-success">Confirm Attendance</a>
             {{ $attendances->links() }}
         </div>
     </div>

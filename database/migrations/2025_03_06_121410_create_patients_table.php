@@ -13,16 +13,14 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->notNullable();
-            $table->enum('gender', ['male', 'female'])->notNullable();
-            $table->integer('age')->notNullable();
-            $table->string('phone_number')->notNullable();
-            $table->string('email')->notNullable();
-            // $table->string('emergency_contact_name')->nullable();
-            // $table->string('emergency_contact_phone')->nullable();
-            $table->string('department')->notNullable();
-            $table->string('year_of_study')->notNullable();
-            $table->string('blood_group')->notNullable();
+            $table->string('name');
+            $table->enum('gender', ['male', 'female']);
+            $table->integer('age')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('email');
+            $table->string('department')->nullable();
+            $table->string('year_of_study')->nullable();
+            $table->string('blood_group')->nullable();
             $table->timestamps();
         });
     }
