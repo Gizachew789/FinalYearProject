@@ -9,7 +9,7 @@ use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Auth\PatientRegistrationController;
-use Inertia\Inertia;
+use App\Http\Controllers\Reception\AppointmentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -100,7 +100,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 // @endif
 
 // Reception routes
-Route::prefix('reception')->name('reception.')->middleware(['auth', 'reception'])->group(function () {
+Route::prefix('reception')->name('reception.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('reception.dashboard');
     })->name('dashboard');
@@ -108,12 +108,14 @@ Route::prefix('reception')->name('reception.')->middleware(['auth', 'reception']
     // Patient registration
     Route::get('/register-patient', [PatientRegistrationController::class, 'showRegistrationForm'])->name('register.patient');
     Route::post('/register-patient', [PatientRegistrationController::class, 'register'])->name('register.patient.store');
-    
-    // Patient management
-    Route::get('/patients', function () {
-        return view('reception.patients.dashboard');
-    })->name('patients.dashboard');
+
+    // Appointment booking (Controller you should create)
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+
 });
+
 
 // Bsc_Nurse routes
 Route::prefix('Bsc_Nurse')->middleware(['auth'])->name('Bsc_Nurse.')->group(function () {

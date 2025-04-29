@@ -3,108 +3,48 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use App\Http\Middleware\ReceptionMiddleware;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUserPasswordMail;
 
 class PatientRegistrationController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('reception');
-    }
-
-    /**
-     * Show the patient registration form.
-     *
-     * @return \Illuminate\View\View
-     */
     public function showRegistrationForm()
     {
-        return "hello";
-        return view('auth.reception.register-patient');
+        return view('reception.patients.register'); // Your registration form view
     }
 
-    /**
-     * Handle a registration request for the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        // Validate the incoming request
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'fillable|string|max:20',
-            'student_id' => 'required|string|max:50|unique:patients',
-            'age' => 'fillable|integer',
-            'gender' => 'fillable|in:male,female',
-            'department' => 'nullable|string|max:255',
-            'year_of_study' => 'nullable|string|max:50',
-            'blood_group' => 'nullable|string|max:10',
-             //'address' => 'nullable|string',
-            // 'emergency_contact_name' => 'nullable|string|max:255',
-            // 'emergency_contact_phone' => 'nullable|string|max:20',
-            //'allergies' => 'nullable|string',
+            'email' => 'required|email|unique:users,email',
+            'gender' => 'required|in:male,female',
+            'age' => 'nullable|integer',
+            'phone' => 'nullable|string|max:20',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput($request->except('password', 'password_confirmation'));
-        }
+        // Generate a random password for the patient
+        $randomPassword = str_random(8); // Adjust length as needed
+        $password = bcrypt($randomPassword); // Encrypt the password before saving
 
-        try {
-            DB::beginTransaction();
+        // Create the patient user
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'gender' => $validated['gender'],
+            'age' => $validated['age'],
+            'phone' => $validated['phone'],
+            'role' => 'Patient',
+            'password' => $password, // Store encrypted password
+        ]);
 
-            // Create user
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => $request->password,
-                'role' => 'patient',
-                'phone' => $request->phone,
-                //'status' => 'active',
-            ]);
-            return response()->json(['message' => 'User registered successfully']);
+        // Send the random password to the patient's email
+        Mail::to($user->email)->send(new NewUserPasswordMail($randomPassword));
 
-            // Create patient profile
-            Patient::create([
-                 'name' => $request->name,
-                'student_id' => $request->student_id,
-                'age' => $request->age,
-                'gender' => $request->gender,
-                'department' => $request->department,
-                'year_of_study' => $request->year_of_study,
-                'blood_group' => $request->blood_group,
-                //'address' => $request->address,
-                // 'emergency_contact_name' => $request->emergency_contact_name,
-                // 'emergency_contact_phone' => $request->emergency_contact_phone,
-                //'allergies' => $request->allergies,
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('reception.patients.dashboard')
-                ->with('success', 'Patient registered successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Registration failed: ' . $e->getMessage())
-                ->withInput($request->except('password', 'password_confirmation'));
-        }
+        return redirect()->route('reception.dashboard')->with('success', 'Patient registered successfully!');
     }
 }
-

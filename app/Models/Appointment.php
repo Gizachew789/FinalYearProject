@@ -20,7 +20,7 @@ class Appointment extends Model
         'appointment_time',
         'reason',
         'status', // pending, confirmed, cancelled, completed
-        'notes',
+        'description',
         'created_by', // user_id of who created the appointment
     ];
 

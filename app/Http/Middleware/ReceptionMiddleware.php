@@ -9,7 +9,7 @@ class ReceptionMiddleware
 {
     public function handle($request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role === 'reception') {
+        if (Auth::check() && Auth::user()->role === 'Reception') {
             return $next($request);
         }
 
