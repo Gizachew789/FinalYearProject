@@ -28,6 +28,7 @@ class PatientAppointmentController extends Controller
             'date'   => ['required', 'date', 'after_or_equal:today'],
             'time'   => ['required'],
             'reason' => ['required', 'string', 'max:1000'],
+            'status' => ['required', 'string', 'in:upcoming,pending,completed'],
         ]);
 
         Appointment::create([
@@ -36,7 +37,7 @@ class PatientAppointmentController extends Controller
             'appointment_date'  => $validated['date'],
             'appointment_time'  => $validated['time'],
             'reason'            => $validated['reason'],
-            'status'            => 'pending',
+            'status'            => $validated['status'],
         ]);
         
 

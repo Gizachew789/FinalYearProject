@@ -19,37 +19,39 @@ class PatientRegistrationController extends Controller
         return view('reception.patients.register'); // Your registration form view
     }
 
-
-
-
     public function register(Request $request)
 {
+    
     $validated = $request->validate([
         'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
         'gender' => 'required',
         'age' => 'integer',
         'phone' => 'string|max:20',
+        'email' => 'required|email|unique:users,email',
+        'department' => 'string|max:255',
+        'year_of_study' => 'string|max:255',   
     ]);
-
+ 
     // ✅ Define and encrypt the random password
-    $randomPassword = Str::random(8);
-    $hashedPassword = bcrypt($randomPassword);
+    // $randomPassword = Str::random(8);
+    // $hashedPassword = bcrypt($randomPassword);
 
     // ✅ Save the new patient with the hashed password
     $user = Patient::create([
         'name' => $validated['name'],
-        'email' => $validated['email'],
         'gender' => $validated['gender'],
         'age' => $validated['age'],
         'phone_number' => $validated['phone'],
-        'password' => $hashedPassword,
+        'email' => $validated['email'],
+        'department' => $validated['department'],
+        'year_of_study' => $validated['year_of_study'],
+        'password' => bcrypt(1234),
     ]);
 
     // ✅ Send email with the plain password
-    Mail::to($user->email)->send(new NewUserPasswordMail($randomPassword));
+    // Mail::to($user->email)->send(new NewUserPasswordMail($randomPassword));
 
-    return redirect()->route('reception.dashboard')->with('success', 'Patient registered successfully!');
+    return view('reception.dashboard')->with('success', 'Patient registered successfully!');
 }
 
 }

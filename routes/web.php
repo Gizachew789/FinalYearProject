@@ -11,6 +11,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Auth\PatientRegistrationController;
 use App\Http\Controllers\Reception\AppointmentController;
 use App\Http\Controllers\Patient\PatientAppointmentController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -108,7 +109,7 @@ Route::prefix('reception')->name('reception.')->middleware(['auth'])->group(func
 
     // Patient registration
     Route::get('/register-patient', [PatientRegistrationController::class, 'showRegistrationForm'])->name('register.patient');
-    Route::post('/register-patient', [PatientRegistrationController::class, 'register'])->name('register.patient.store');
+    Route::post('/register/patient', [PatientRegistrationController::class, 'register'])->name('register.patient.store');
 
     // Appointment booking (Controller you should create)
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
@@ -120,7 +121,8 @@ Route::prefix('reception')->name('reception.')->middleware(['auth'])->group(func
 
 // Bsc_Nurse, Nurse and HealthOfficer routes
 Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard.index');
+
 
     // Appointments
     Route::post('/appointments/{id}/accept', [AppointmentController::class, 'accept'])->name('appointments.accept');

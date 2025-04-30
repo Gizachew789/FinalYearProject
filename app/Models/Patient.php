@@ -17,14 +17,12 @@ class Patient extends Model
     protected $fillable = [
         'patient_id', // University student ID
         'name',
-        'email',
-        'password',
         'gender',
         'age',
-        'phone number', 
+        'phone_number', 
+        'email',
         'department',
         'year_of_study',
-        'blood_group',
     ];
 
     /**
@@ -57,8 +55,13 @@ class Patient extends Model
      */
     public function medicalRecords()
     {
-        return $this->hasMany(MedicalRecord::class);
+        return $this->hasMany(Medicalrecord::class);
     }
+
+    public function labResults()
+   {
+    return $this->hasMany(Result::class); // Replace Result with your actual model name for lab results
+   }
 
     /**
      * Get the prescriptions for the patient.

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>Welcome, {{ $user->name }} ({{ $user->role }})</h1>
+    <h1>Welcome, {{ $user->name }}</h1>
     <p class="mb-4">This is your shared staff dashboard.</p>
 
     {{-- Appointments Section --}}
@@ -25,7 +25,7 @@
                     <tbody>
                         @foreach($appointments as $appointment)
                             <tr>
-                                <td>{{ $appointment->patient->user->name }}</td>
+                            <td>{{ optional($appointment->patient?->user)->name ?? 'N/A' }}</td>
                                 <td>{{ $appointment->appointment_date }}</td>
                                 <td>{{ $appointment->appointment_time }}</td>
                                 <td>{{ ucfirst($appointment->status) }}</td>

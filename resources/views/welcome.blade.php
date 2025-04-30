@@ -19,6 +19,7 @@
             <a href="{{ route('admin.register.user') }}" class="inline-block bg-green-600 hover:bg-green-700 text-black text-sm font-medium px-6 py-3 rounded shadow transition">
                 Register User
             </a>
+            
         </div>
     </div>
 @endsection

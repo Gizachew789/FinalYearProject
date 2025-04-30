@@ -17,11 +17,6 @@
         </div>
 
         <div class="mb-4">
-            <label>Email</label>
-            <input type="email" name="email" class="w-full border p-2 rounded" required>
-        </div>
-
-        <div class="mb-4">
             <label>Gender</label>
             <select name="gender" class="w-full border p-2 rounded" required>
                 <option value="male">Male</option>
@@ -36,7 +31,22 @@
 
         <div class="mb-4">
             <label>Phone</label>
-            <input type="text" name="phone" class="w-full border p-2 rounded">
+            <input type="text" name="Phone_number" class="w-full border p-2 rounded">
+        </div>
+
+        <div class="mb-4">
+            <label>Email</label>
+            <input type="email" name="email" class="w-full border p-2 rounded" required>
+        </div>
+
+        <div class="mb-4">
+            <label>Department</label>
+            <input type="text" name="department" class="w-full border p-2 rounded">
+        </div>
+
+        <div class="mb-4">
+            <label>year of study</label>
+            <input type="text" name="year_of_study" class="w-full border p-2 rounded">
         </div>
 
         <button type="submit" class="bg-green-600 text-black px-4 py-2 rounded">Register Patient</button>

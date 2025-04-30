@@ -67,10 +67,19 @@ class AppointmentController extends Controller
         return redirect()->route('reception.appointments.index')->with('success', 'Appointment updated successfully.');
     }
 
+    public function accept($id)
+  {
+    $appointment = Appointment::findOrFail($id);
+    $appointment->status = 'confirmed';
+    $appointment->save();
+
+    return redirect()->back()->with('success', 'Appointment accepted successfully.');
+  }
+
     // Optional: Delete appointment
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
         return redirect()->route('reception.appointments.index')->with('success', 'Appointment deleted successfully.');
     }
-}
+ }

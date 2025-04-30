@@ -10,21 +10,27 @@ class Medicalrecord extends Model
     use HasFactory;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'medical_records'; // Ensure correct table name
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'admins_id',
-        'staff_id', // University staff ID
-        'name',
-        'gender',
-        'phone',
-        'email',
-        'emergency_contact_name',
-        'emergency_contact_phone',
-        'date_joined',
-        'shift',
+        'patient_id',
+        'created_by',
+        'recorded_by',
+        'diagnosis',
+        'treatment',
+        'prescription',
+        'visit_date',
+        'follow_up_date',
+        'lab_results_id',
     ];
 
     /**
@@ -33,24 +39,30 @@ class Medicalrecord extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        //'date_of_birth' => 'date',
-        'date_joined' => 'date',
+        'visit_date' => 'date',
+        'follow_up_date' => 'date',
     ];
 
     /**
-     * Get the user that owns the reception.
+     * Relationships
      */
-    public function user()
+    public function patient()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Patient::class);
     }
 
-    /**
-     * Get the appointments created by the reception.
-     */
-    public function createdAppointments()
+    public function recordedBy()
     {
-        return $this->hasMany(Appointment::class, 'created_by');
+        return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    public function labResults()
+    {
+        return $this->belongsTo(Result::class, 'lab_results_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
-
