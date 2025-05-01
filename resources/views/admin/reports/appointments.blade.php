@@ -49,8 +49,8 @@
         @forelse ($appointments as $appointment)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $appointment->patient->user->name }}</td>
-                <td>{{ $appointment->reception->user->name }}</td>
+                <td>{{ $appointment->patient->user->name ?? 'No Patient Info' }}</td>
+                <td>{{ $appointment->reception->user->name ?? 'No Receptionist Info' }}</td>
                 <td>{{ $appointment->appointment_date }}</td>
                 <td>{{ $appointment->appointment_time }}</td>
                 <td>{{ ucfirst($appointment->status) }}</td>

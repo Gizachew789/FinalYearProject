@@ -78,7 +78,7 @@ class InventoryController extends Controller
 
         $medication = Medication::create($request->all());
 
-        return redirect()->route('inventory.index')->with('success', 'Medication added successfully');
+        return redirect()->route('admin.inventory.index')->with('success', 'Medication added successfully');
     }
 
     /**

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Appointment;
 use App\Models\Patient;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -17,17 +18,18 @@ class DashboardController extends Controller
         $appointments = Appointment::with(['patient.user'])
             ->orderBy('appointment_date', 'asc')
             ->get();
+            // Try to get a patient associated with the first valid appointment
+            $patient = null;
+           
 
-        // Try to get a patient associated with the first valid appointment
-        $patient = null;
-
-        foreach ($appointments as $appointment) {
-            if ($appointment->patient && $appointment->patient->user) {
-                $patient = Patient::with(['user', 'medicalRecords', 'labResults', 'prescriptions'])
+            foreach ($appointments as $appointment) {
+                if ($appointment->patient ) {
+                    $patient = Patient::with(['user', 'medicalRecords', 'labResults', 'prescriptions'])
                     ->find($appointment->patient_id);
-                break; // Only load the first available patient
+                    break; // Only load the first available patient
+                }
             }
-        }
+            Log::info('A loaded for staff dashboard', ['patient' => $patient]);
 
         return view('staff.dashboard', [
             'user' => $user,

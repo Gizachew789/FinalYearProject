@@ -39,8 +39,9 @@ class UserRegistrationController extends Controller
         'phone' => $validated['phone'],
         'status' => $validated['status'],
         'email' => $validated['email'],
-        'password' => $randomPassword, // will be auto-hashed by your model's setPasswordAttribute()
         'role' => $validated['role'],
+        'password' => $randomPassword, // will be auto-hashed by your model's setPasswordAttribute()
+        
     ]);
 
     $user = User::where('email', $validated['email'])->first();

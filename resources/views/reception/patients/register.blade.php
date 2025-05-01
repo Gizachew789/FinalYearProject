@@ -31,7 +31,7 @@
 
         <div class="mb-4">
             <label>Phone</label>
-            <input type="text" name="Phone_number" class="w-full border p-2 rounded">
+            <input type="text" name="phone" class="w-full border p-2 rounded">
         </div>
 
         <div class="mb-4">

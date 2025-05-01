@@ -14,6 +14,9 @@ use App\Http\Controllers\Patient\PatientAppointmentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PharmacistDashboardController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\LabRequestController;
+use App\Http\Controllers\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -121,9 +124,12 @@ Route::prefix('reception')->name('reception.')->middleware(['auth'])->group(func
 });
 
 
+
+
+
 // Bsc_Nurse, Nurse and HealthOfficer routes
 Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard.index');
+    Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard');
 
 
     // Appointments
@@ -134,19 +140,29 @@ Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () 
     Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.show');
 
     // Medical Records
-    Route::post('/patients/{id}/medical-records', [MedicalRecordController::class, 'store'])->name('medical-records.store');
+    // Route::get('/medical-records', [MedicalRecordController::class, 'index'])->name('medical-records.index');
+    // Route::get('/medical-records/create', [MedicalRecordController::class, 'create'])->name('medical-records.create');
+    // Route::get('/medical-records/{id}', [MedicalRecordController::class, 'show'])->name('medical-records.show');
+     Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('medical_records.store');
 
     // Lab Requests 
-    Route::get('/patients/{id}/lab-requests/create', [LabRequestController::class, 'create'])->name('lab-requests.create');
-    Route::post('/patients/{id}/lab-requests', [LabRequestController::class, 'store'])->name('lab-requests.store');
+    Route::get('/lab-requests/create/{id}', [LabRequestController::class, 'create'])->name('lab-requests.create');
+    Route::post('/lab-requests/{id}', [LabRequestController::class, 'store'])->name('lab-requests.store');
 
     // Prescriptions
-    Route::get('/patients/{id}/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
-    Route::post('/patients/{id}/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+    Route::get('/prescriptions/create/{id}', [PrescriptionController::class, 'create'])->name('prescriptions.create');
+    Route::post('/prescriptions/{id}', [PrescriptionController::class, 'store'])->name('prescriptions.store');
 
     // Lab Results
-    Route::get('/patients/{id}/lab-results', [ResultController::class, 'index'])->name('patients.lab-results.index');
+    Route::get('/lab-results/{id}', [ResultController::class, 'index'])->name('lab-results.index');
+    Route::post('/lab-results', [ResultController::class, 'store'])->name('lab-results.store');
 });
+
+
+
+
+
+
 
 
 // Result routes

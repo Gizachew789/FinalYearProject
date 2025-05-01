@@ -15,42 +15,29 @@ class Prescription extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id', // University staff ID
-        'name',
-        'age',
-        'gender',
-        'phone',
-        'email',
-        'emergency_contact_name',
-        'emergency_contact_phone',
-        'date_joined',
-        'shift',
+        'patient_id',
+        'prescriber_id',
+        'medication_id',
+        'dosage',
+        'instructions',
+        'frequency',
+        'status',
+        'duration',
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * The patient that the prescription is for.
      */
-    protected $casts = [
-        'date_of_birth' => 'date',
-        'date_joined' => 'date',
-    ];
-
-    /**
-     * Get the user that owns the pharmacist.
-     */
-    public function user()
+    public function patient()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Patient::class);
     }
 
     /**
-     * Get the prescriptions dispensed by the pharmacist.
+     * The user (e.g., nurse or health officer) who prescribed.
      */
-    public function dispensedPrescriptions()
+    public function prescriber()
     {
-        return $this->hasMany(Prescription::class, 'dispensed_by');
+        return $this->belongsTo(User::class, 'prescriber_id');
     }
 }
-

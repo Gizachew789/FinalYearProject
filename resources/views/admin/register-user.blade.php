@@ -59,7 +59,7 @@
             </select>
         </div>
 
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Register</button>
+        <button type="submit" class="bg-green-600 text-green px-4 py-2 rounded">Register</button>
     </form>
 </div>
 @endsection

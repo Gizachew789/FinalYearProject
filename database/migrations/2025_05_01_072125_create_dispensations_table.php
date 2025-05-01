@@ -12,7 +12,7 @@ class CreateDispensationsTable extends Migration
         Schema::create('dispensations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('prescription_id')->constrained()->onDelete('cascade');
-            $table->foreignId('inventory_id')->constrained()->onDelete('cascade');
+            $table->foreignId('inventory_transaction_id')->constrained()->onDelete('cascade');
             $table->integer('quantity_used');
             $table->foreignId('pharmacist_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();

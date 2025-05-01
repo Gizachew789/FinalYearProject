@@ -25,7 +25,7 @@
                     <tbody>
                         @foreach($appointments as $appointment)
                             <tr>
-                            <td>{{ optional($appointment->patient?->user)->name ?? 'N/A' }}</td>
+                            <td>{{ $patient->name }}</td>
                                 <td>{{ $appointment->appointment_date }}</td>
                                 <td>{{ $appointment->appointment_time }}</td>
                                 <td>{{ ucfirst($appointment->status) }}</td>
@@ -50,7 +50,7 @@
     {{-- Medical History Section --}}
     @if(isset($patient))
     <div class="card mb-4">
-        <div class="card-header">Medical History - {{ $patient->user->name }}</div>
+        <div class="card-header">Medical History - {{ $patient->name }}</div>
         <div class="card-body">
             @if($patient->medicalRecords->isEmpty())
                 <p>No medical records found.</p>
@@ -68,7 +68,7 @@
     <div class="card mb-4">
         <div class="card-header">Upload New Medical Document</div>
         <div class="card-body">
-            <form action="{{ route('staff.medical-records.store', $patient->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('staff.medical_records.store', $patient->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="form-group">
                     <label for="document">Medical Document (PDF or Image)</label>

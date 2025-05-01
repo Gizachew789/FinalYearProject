@@ -26,22 +26,22 @@ class PatientRegistrationController extends Controller
         'name' => 'required|string|max:255',
         'gender' => 'required',
         'age' => 'integer',
-        'phone' => 'string|max:20',
-        'email' => 'required|email|unique:users,email',
+        'phone' => 'required|string|max:20',
+        'email' => 'required|email|unique:patients,email',
         'department' => 'string|max:255',
         'year_of_study' => 'string|max:255',   
     ]);
- 
+
     // ✅ Define and encrypt the random password
     // $randomPassword = Str::random(8);
     // $hashedPassword = bcrypt($randomPassword);
 
     // ✅ Save the new patient with the hashed password
-    $user = Patient::create([
+    $patient = Patient::create([
         'name' => $validated['name'],
         'gender' => $validated['gender'],
         'age' => $validated['age'],
-        'phone_number' => $validated['phone'],
+        'phone' => $validated['phone'],
         'email' => $validated['email'],
         'department' => $validated['department'],
         'year_of_study' => $validated['year_of_study'],
