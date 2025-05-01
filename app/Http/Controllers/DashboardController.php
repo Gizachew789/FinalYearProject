@@ -13,21 +13,26 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Load appointments with patient and their associated user
+        // Load all appointments for staff to view
         $appointments = Appointment::with(['patient.user'])
             ->orderBy('appointment_date', 'asc')
             ->get();
 
-        // Optional: Load a specific patient with related data if needed
-        // For now, just get the first patient from appointments if exists
-        $firstAppointmentWithPatient = $appointments->firstWhere(fn($appt) => $appt->patient && $appt->patient->user);
-
+        // Try to get a patient associated with the first valid appointment
         $patient = null;
-        if ($firstAppointmentWithPatient) {
-            $patient = Patient::with(['user', 'medicalRecords', 'labResults', 'prescriptions'])
-                ->find($firstAppointmentWithPatient->patient_id);
+
+        foreach ($appointments as $appointment) {
+            if ($appointment->patient && $appointment->patient->user) {
+                $patient = Patient::with(['user', 'medicalRecords', 'labResults', 'prescriptions'])
+                    ->find($appointment->patient_id);
+                break; // Only load the first available patient
+            }
         }
 
-        return view('staff.dashboard', compact('user', 'appointments', 'patient'));
+        return view('staff.dashboard', [
+            'user' => $user,
+            'appointments' => $appointments,
+            'patient' => $patient,
+        ]);
     }
 }

@@ -12,6 +12,8 @@ use App\Http\Controllers\Auth\PatientRegistrationController;
 use App\Http\Controllers\Reception\AppointmentController;
 use App\Http\Controllers\Patient\PatientAppointmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PharmacistDashboardController;
+use App\Http\Controllers\PatientController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -128,12 +130,13 @@ Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () 
     Route::post('/appointments/{id}/accept', [AppointmentController::class, 'accept'])->name('appointments.accept');
 
     // Patients
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
     Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.show');
 
     // Medical Records
     Route::post('/patients/{id}/medical-records', [MedicalRecordController::class, 'store'])->name('medical-records.store');
 
-    // Lab Requests
+    // Lab Requests 
     Route::get('/patients/{id}/lab-requests/create', [LabRequestController::class, 'create'])->name('lab-requests.create');
     Route::post('/patients/{id}/lab-requests', [LabRequestController::class, 'store'])->name('lab-requests.store');
 
@@ -142,7 +145,7 @@ Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () 
     Route::post('/patients/{id}/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
 
     // Lab Results
-    Route::get('/patients/{id}/lab-results', [ResultController::class, 'index'])->name('lab-results.index');
+    Route::get('/patients/{id}/lab-results', [ResultController::class, 'index'])->name('patients.lab-results.index');
 });
 
 
@@ -160,11 +163,11 @@ Route::prefix('lab_technician')->middleware(['auth'])->name('lab_technician.')->
 });
 
 // Pharmacist routes
-Route::prefix('pharmacist')->middleware(['auth'])->name('pharmacist.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('pharmacist.dashboard');
-    })->name('dashboard');
+Route::middleware(['auth'])->prefix('pharmacist')->name('pharmacist.')->group(function () {
+    Route::get('/dashboard', [PharmacistDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/prescriptions/{id}/dispense', [PharmacistDashboardController::class, 'dispense'])->name('prescriptions.dispense');
 });
+
 
 // Patient routes
 Route::prefix('patient')->middleware(['auth'])->name('patient.')->group(function () {

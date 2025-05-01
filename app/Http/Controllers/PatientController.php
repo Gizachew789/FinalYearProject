@@ -18,7 +18,7 @@ class PatientController extends Controller
     public function index()
     {
         $patients = Patient::with('user')->get();
-        return response()->json(['patients' => $patients]);
+        return view('patients.index', ['patients' => $patients]);
     }
 
     /**
@@ -85,7 +85,7 @@ class PatientController extends Controller
     public function show($id)
     {
         $patient = Patient::with(['user', 'appointments', 'medicalRecords', 'prescriptions'])->findOrFail($id);
-        return response()->json(['patient' => $patient]);
+        return view('patients.show', ['patient' => $patient]);
     }
 
     /**

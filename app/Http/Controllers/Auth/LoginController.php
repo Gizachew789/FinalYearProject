@@ -33,7 +33,8 @@ class LoginController extends Controller
             return match ($user->role) {
                 'Admin' => redirect()->route('admin.dashboard'),
                 'Reception' => redirect()->route('reception.dashboard'),
-                'Physician' => redirect()->route('physician.dashboard'),
+                'Nurse' => redirect()->route('staff.dashboard'),
+                'Health_Officer' => redirect()->route('staff.dashboard'),
                 'Lab_Technician' => redirect()->route('lab.dashboard'),
                 'Pharmacist' => redirect()->route('pharmacist.dashboard'),
                 'Patient' => redirect()->route('patient.dashboard'),

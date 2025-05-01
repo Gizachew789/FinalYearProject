@@ -29,7 +29,7 @@ class Medication extends Model
     /**
      * Get the inventory transactions related to the medication.
      */
-    public function transactions()
+    public function inventoryTransactions()
     {
         return $this->hasMany(InventoryTransaction::class);
     }
