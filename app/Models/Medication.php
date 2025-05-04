@@ -16,7 +16,6 @@ class Medication extends Model
         'unit',
         'current_stock',
         'reorder_level',
-        'price',
         'expiry_date',
         'manufacturer',
     ];

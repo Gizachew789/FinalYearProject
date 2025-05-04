@@ -1,32 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
-    <h2>All Appointments</h2>
+<div class="container">
+    <h1 class="text-2xl font-bold mb-4">All Appointments</h1>
 
-    <a href="{{ route('reception.appointments.create') }}" class="btn btn-primary mb-3">Book New Appointment</a>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    <table class="table table-bordered">
+    <table class="table-auto w-full border">
         <thead>
             <tr>
-                <th>Patient</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Description</th>
+                <th class="border px-4 py-2">Patient Name</th>
+                <th class="border px-4 py-2">Date</th>
+                <th class="border px-4 py-2">Time</th>
+                <th class="border px-4 py-2">Reason</th>
             </tr>
         </thead>
         <tbody>
             @foreach($appointments as $appointment)
-                <tr>
-                    <td>{{ $appointment->patient->name ?? 'Unknown' }}</td>
-                    <td>{{ $appointment->appointment_date }}</td>
-                    <td>{{ $appointment->appointment_time }}</td>
-                    <td>{{ $appointment->description }}</td>
-                </tr>
+            <tr>
+                <td class="border px-4 py-2">{{ $appointment->patient->name ?? 'Unknown' }}</td>
+                <td class="border px-4 py-2">{{ $appointment->appointment_date }}</td>
+                <td class="border px-4 py-2">{{ $appointment->appointment_time }}</td>
+                <td class="border px-4 py-2">{{ $appointment->reason ?? 'N/A' }}</td>
+            </tr>
             @endforeach
         </tbody>
     </table>

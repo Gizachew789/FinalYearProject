@@ -3,23 +3,23 @@
 
 @section('content')
 <div class="container mt-4">
-    <h2>Confirm Attendance for {{ $user->name }}</h2>
+    <h2>Confirm Attendance for {{ $attendance->user->name }}</h2>
 
-    <form action="{{ route('admin.attendance.confirm.submit', $user->id) }}" method="POST">
+    <form action="{{ route('admin.attendance.confirm', $attendance->id) }}" method="POST">
         @csrf
 
         <div class="mb-3">
             <label for="date" class="form-label">Date</label>
-            <input type="date" name="date" class="form-control" value="{{ old('date', date('Y-m-d')) }}" required>
+            <input type="date" name="date" class="form-control" value="{{ old('date', $attendance->date ?? date('Y-m-d')) }}" required>
         </div>
 
         <div class="mb-3">
             <label for="status" class="form-label">Status</label>
             <select name="status" class="form-select" required>
-                <option value="present">Present</option>
-                <option value="absent">Absent</option>
-                <option value="late">Late</option>
-                <option value="half_day">Half Day</option>
+                <option value="present" {{ old('status', $attendance->status) == 'present' ? 'selected' : '' }}>Present</option>
+                <option value="absent" {{ old('status', $attendance->status) == 'absent' ? 'selected' : '' }}>Absent</option>
+                <option value="late" {{ old('status', $attendance->status) == 'late' ? 'selected' : '' }}>Late</option>
+                <option value="half_day" {{ old('status', $attendance->status) == 'half_day' ? 'selected' : '' }}>Half Day</option>
             </select>
         </div>
 

@@ -31,7 +31,7 @@ class AppointmentController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
-            'description' => 'nullable|string|max:500',
+            'reason' => 'nullable|string|max:500',
         ]);
 
         Appointment::create($validated);
@@ -46,11 +46,11 @@ class AppointmentController extends Controller
     }
 
     // Optional: Edit appointment (not necessary now but useful)
-    public function edit(Appointment $appointment)
-    {
-        $patients = Patient::all();
-        return view('reception.appointments.edit', compact('appointment', 'patients'));
-    }
+    // public function edit(Appointment $appointment)
+    // {
+    //     $patients = Patient::all();
+    //     return view('reception.appointments.edit', compact('appointment', 'patients'));
+    // }
 
     // Optional: Update appointment
     public function update(Request $request, Appointment $appointment)
@@ -59,7 +59,7 @@ class AppointmentController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
-            'description' => 'nullable|string|max:500',
+            'reason' => 'nullable|string|max:500',
         ]);
 
         $appointment->update($validated);

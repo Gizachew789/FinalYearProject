@@ -10,14 +10,14 @@
             <label for="patient_id">Patient</label>
             <select name="patient_id" id="patient_id" class="form-control">
                 @foreach($patients as $patient)
-                    <option value="{{ $patient->id }}">{{ $patient->name }}</option>
+                <option value="{{ $patient->id }}">{{ $patient->full_name ?? 'Patient '.$patient->id }}</option>
                 @endforeach
             </select>
         </div>
 
         <div class="form-group">
             <label for="tested_by">Tested By</label>
-            <select name="tested_by" id="tested_by" class="form-control">
+            <select name="tested_by" id="tested_by" class="form-control" required>
                 @foreach($users as $user)
                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                 @endforeach

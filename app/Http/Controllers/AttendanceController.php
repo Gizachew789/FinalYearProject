@@ -31,8 +31,6 @@ class AttendanceController extends Controller
            $user = Auth::user(); // or however you want to get the user
          return view('admin.attendance.index', compact('attendances', 'user'));
 
-
-
     }
 
     /**
@@ -63,21 +61,22 @@ class AttendanceController extends Controller
     /**
      * Display the specified attendance.
      */
-    public function show($userid)
+    public function show(Attendance $attendance)
     {
-        $attendance = Attendance::with('user')->where('user_id', $userid)->latest()->firstOrFail();
         return view('admin.attendance.show', compact('attendance'));
     }
 
 
      // Show confirmation form
 
-     public function confirmForm(User $user)
+     public function confirmForm($id)
     {
-        return view('admin.attendance.confirm', compact('user'));
+        $attendance = Attendance::with('user')->findOrFail($id);
+
+        return view('admin.attendance.confirm', compact('attendance'));
     }
 
-    public function confirm(Request $request, User $user)
+    public function confirm(Request $request, Attendance $attendance)
     {
         // Process logic...
     

@@ -45,4 +45,25 @@ class LabRequestController extends Controller
 
         return redirect()->route('staff.patients.show', $patient->id)->with('success', 'Lab request submitted.');
     }
+    public function index()
+    {
+        // Only allow specific roles to view lab requests
+        // if (!Auth::user()->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
+        //     abort(403, 'Unauthorized');
+        // }
+
+        $labRequests = LabRequest::with('patient', 'requestedBy')->latest()->get();
+        return view('staff.lab-requests.index', compact('labRequests'));
+    }
+    public function show($id)
+    {
+        $labRequest = LabRequest::with('patient')->findOrFail($id);
+
+        // Only allow specific roles to view lab request details
+        // if (!Auth::user()->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
+        //     abort(403, 'Unauthorized');
+        // }
+
+        return view('staff.lab-requests.show', compact('labRequest'));
+    }
 }

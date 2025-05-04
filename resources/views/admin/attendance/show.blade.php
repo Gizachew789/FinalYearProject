@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="container mt-4">
-    <h2>Attendance Detail for {{ $attendance->user->name }}</h2>
+    <h2>Attendance Detail</h2>
 
     <div class="card mt-3">
         <div class="card-body">

@@ -17,6 +17,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\LabRequestController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,6 +31,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+     Route::resource('roles', RoleController::class);
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -38,9 +40,6 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // Admin routes
-
-  
-
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     // Admin dashboard
     Route::get('/dashboard', function () {
@@ -83,7 +82,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/{user}/confirm', [AttendanceController::class, 'confirmForm'])->name('attendance.confirm'); // Confirm a user's attendance
     Route::get('/attendance/create', [AttendanceController::class, 'create'])->name('attendance.create');
-    Route::post('/attendance/{user}/confirm', [AttendanceController::class, 'confirm'])->name('attendance.confirm.submit'); // Confirm a user's attendance
+    Route::post('/attendance/{user}/confirm', [AttendanceController::class, 'confirm'])->name('attendance.confirm'); // Confirm a user's attendance
 
     // Inventory management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index'); // View all inventory items
@@ -94,6 +93,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update'); // Update an inventory item
     Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy'); // Delete an inventory item
     Route::get('/inventory/low-stock', [InventoryController::class, 'lowStock'])->name('inventory.lowStock'); // view low stock item
+ 
+         // patient management
+         Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+         Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.show');
+         Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
+         Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 
 });
@@ -121,6 +128,7 @@ Route::prefix('reception')->name('reception.')->middleware(['auth'])->group(func
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
      Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 
+
 });
 
 
@@ -147,6 +155,8 @@ Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () 
 
     // Lab Requests 
     Route::get('/lab-requests/create/{id}', [LabRequestController::class, 'create'])->name('lab-requests.create');
+    Route::get('/lab-requests/{id}', [LabRequestController::class, 'show'])->name('lab-requests.show');
+    Route::get('/lab-requests', [LabRequestController::class, 'index'])->name('lab.requests.index');
     Route::post('/lab-requests/{id}', [LabRequestController::class, 'store'])->name('lab-requests.store');
 
     // Prescriptions
@@ -171,12 +181,20 @@ Route::resource('results', ResultController::class);
 // LabReport routes
 Route::resource('lab_reports', LabReportController::class);
 
-// Lab technician routes
-Route::prefix('lab_technician')->middleware(['auth'])->name('lab_technician.')->group(function () {
+// Lab Technician routes
+Route::prefix('lab-technician')->name('lab.requests.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
-        return view('lab.dashboard');
+        return view('lab-technician.dashboard');
     })->name('dashboard');
+
+    Route::get('/requests', [LabRequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/{id}', [LabRequestController::class, 'show'])->name('requests.show');
+    Route::get('/requests/{id}/accept', [LabRequestController::class, 'accept'])->name('requests.accept');
+    
+    Route::get('/results/upload', [ResultController::class, 'create'])->name('results.upload');
+    Route::post('/results/store', [ResultController::class, 'store'])->name('results.store');
 });
+
 
 // Pharmacist routes
 Route::middleware(['auth'])->prefix('pharmacist')->name('pharmacist.')->group(function () {
@@ -193,3 +211,7 @@ Route::prefix('patient')->middleware(['auth'])->name('patient.')->group(function
     Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
 });
 
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

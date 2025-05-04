@@ -15,7 +15,7 @@ class LabReport extends Model
     // The attributes that are mass assignable
     protected $fillable = [
         'patient_id', 
-        'physician_id', 
+        'labtechnician_id', 
         'report_date', 
         'test_type',
         'test_results',

@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-header">{{ __('Admin Dashboard') }}</div>
 
-                <div class="card-body">
+                 <div class="card-body">
                     <!-- This component displays alert messages, such as success or error notifications -->
                     <!-- For customization or further details, refer to the documentation: https://laravel.com/docs/8.x/blade#components -->
                   
@@ -65,6 +65,13 @@
                                     'button' => 'Attendance Management',
                                     'class' => 'btn-secondary'
                                 ],
+                                [
+                                    'title' => 'Patient Management',
+                                    'text' => 'Manage patient-related tasks.',
+                                    'route' => route('admin.patients.index'),
+                                    'button' => 'Patient Management',
+                                    'class' => 'btn-secondary'
+                                ],
                             ];
                         @endphp
                     
@@ -80,6 +87,12 @@
                             </div>
                         @endforeach
                     </div>
+                     @if(session('success'))
+                      <div class="alert alert-success">
+                         {{ session('success') }}
+                      </div>
+                     @endif
+
                 </div>
             </div>
         </div>

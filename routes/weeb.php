@@ -829,3 +829,7 @@ if (!Auth::user()->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
             'prescription' => $prescription,
         ]);
     }
+
+
+
+    Jossey password  fcBiprgwGh

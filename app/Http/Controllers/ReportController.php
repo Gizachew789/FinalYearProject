@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 
 
+
 class ReportController extends Controller
 {
     /**
@@ -61,56 +62,65 @@ class ReportController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function inventoryReports(Request $request)
-    {
-        $user = $request->user();
-        
-        // Only admin and users can access this
-        if (!$user->isAdmin() && !$user->isUser()) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 403);
-        }
-        // Date range filter
-        $startDate = $request->input('start_date', now()->subMonth());
-        $endDate = $request->input('end_date', now());
-
-        // Low stock medications
-        $lowStockMedications = Medication::whereRaw('current_stock <= reorder_level')
-            ->orderBy('current_stock')
-            ->get();
-
-                // Prescriber-based data
-                   $prescriberData = DB::table('prescriptions')
-                    ->select('prescriber_id', DB::raw('count(*) as count'))
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->groupBy('prescriber_id')
-                    ->get();
-
-        // Most used medications
-        $mostUsedMedications = InventoryTransaction::whereBetween('transaction_date', [$startDate, $endDate])
-            ->where('transaction_type', 'out')
-            ->select('medication_id', DB::raw('SUM(quantity) as total_used'))
-            ->groupBy('medication_id')
-            ->with('medication:id,name,current_stock')
-            ->orderByDesc('total_used')
-            ->limit(10)
-            ->get();
-
-            $categories = Medication::select('category')->distinct()->pluck('category');
-            $medications = Medication::all();
-
-        return view('admin.reports.inventory', [
-            'low_stock' => $lowStockMedications,
-            'most_used' => $mostUsedMedications,
-            'date_range' => [
-                'start_date' => $startDate,
-                'end_date' => $endDate
-            ],
-            'prescriber_data' => $prescriberData,
-            'categories' => $categories, 
-            'medications' => $medications, 
-        ]);
+{
+    $user = $request->user();
+    
+    // Only admin and users can access this
+    if (!$user->isAdmin()) {
+        return response()->json([
+            'message' => 'Unauthorized',
+        ], 403);
     }
+
+    // Date range filters
+    $startDate = $request->input('start_date', now()->subMonth());
+    $endDate = $request->input('end_date', now());
+
+    // Base query for medications
+    $medicationQuery = Medication::query();
+
+    // Filter by category
+    if ($request->filled('category')) {
+        $medicationQuery->where('category', $request->input('category'));
+    }
+
+    // Filter by search keyword (name)
+    if ($request->filled('search')) {
+        $medicationQuery->where('name', 'like', '%' . $request->input('search') . '%');
+    }
+
+    // Filter by low stock
+    if ($request->input('low_stock') === 'true') {
+        $medicationQuery->whereColumn('current_stock', '<=', 'reorder_level');
+    }
+
+    // Final filtered result
+    $lowStockMedications = $medicationQuery->orderBy('current_stock')->get();
+
+    // Most used medications
+    $mostUsedMedications = InventoryTransaction::whereBetween('transaction_date', [$startDate, $endDate])
+        ->where('transaction_type', 'out')
+        ->select('medication_id', DB::raw('SUM(quantity) as total_used'))
+        ->groupBy('medication_id')
+        ->with('medication:id,name,current_stock')
+        ->orderByDesc('total_used')
+        ->limit(10)
+        ->get();
+
+    // All distinct categories for filter dropdown
+    $categories = Medication::select('category')->distinct()->pluck('category');
+
+    return view('admin.reports.inventory', [
+        'low_stock' => $lowStockMedications,
+        'most_used' => $mostUsedMedications,
+        'date_range' => [
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ],
+        'categories' => $categories,
+    ]);
+}
+
 
     /**
      * Generate user performance reports.

@@ -19,7 +19,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'age',
         'gender',
         'phone',
-        'status',
         'email',
         'role',
         'password',
@@ -69,11 +68,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->role === 'Pharmacist';
     }
+    public function isNurse()
+    {
+        return $this->role === 'Nurse';
+    }
 
     public function isPatient()
     {
         return $this->role === 'Patient';
     }
+
+    public function isUser()
+  {
+    return $this->role === 'User'; // or whatever value you use for the user role
+  }
+
 
     // Relationships
     public function patient()

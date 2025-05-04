@@ -44,7 +44,7 @@ class ResultController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'patient_id' => 'required|exists:patients,id',
+            'id' => 'required|exists:patients,id',
             'tested_by' => 'required|exists:users,id',
             'disease_type' => 'required|string|max:255',
             'sample_type' => 'required|in:Blood,Saliva,Tissue,Waste',
@@ -52,19 +52,25 @@ class ResultController extends Controller
             'recommendation' => 'nullable|string|max:255',
             'result_date' => 'required|date',
         ]);
-
+    
+   
         Result::create([
-            'patient_id' => $request->patient_id,
-            'tested_by' => $request->tested_by,
-            'disease_type' => $request->disease_type,
-            'sample_type' => $request->sample_type,
-            'result' => $request->result,
-            'recommendation' => $request->recommendation,
-            'result_date' => $request->result_date,
-        ]);
+            'id' => $request->input('id'),
+            'tested_by' => $request->input('tested_by'),
+            'disease_type' => $request->input('disease_type'),
+            'sample_type' => $request->input('sample_type'),
+            'result' => $request->input('result'),
+            'recommendation' => $request->input('recommendation'),
+            'result_date' => $request->input('result_date'),
+            
+            dd($request->all()),
 
+        ]);
+    
+       
         return redirect()->route('results.index')->with('success', 'Test result created successfully.');
     }
+    
 
     // Show the form to edit an existing result
     public function edit(Result $result)

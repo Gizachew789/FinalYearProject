@@ -20,7 +20,6 @@
                 <th>Category</th>
                 <th>Current Stock</th>
                 <th>Reorder Level</th>
-                <th>Price</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -33,7 +32,6 @@
                     <td>{{ $medication->unit }}</td>
                     <td>{{ $medication->current_stock }}</td>
                     <td>{{ $medication->reorder_level }}</td>
-                    <td>{{ $medication->price }}</td>
                     <td>{{ $medication->expiry_date }}</td>
                     <td>{{ $medication->manufacturer }}</td>
                     <td>

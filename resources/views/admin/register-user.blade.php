@@ -33,16 +33,7 @@
             <label>Phone</label>
                <input type="text" name="phone" class="w-full border p-2 rounded">
          </div>
-
-          <div class="mb-4">
-              <label>Status</label>
-             <select name="status" class="w-full border p-2 rounded">
-               <option value="active" selected>Active</option>
-                  <option value="inactive">Inactive</option>
-             </select>
-              </div>
-
-
+         
         <div class="mb-4">
             <label>Email</label>
             <input type="email" name="email" class="w-full border p-2 rounded" required>
@@ -51,11 +42,11 @@
         <div class="mb-4">
             <label>Role</label>
             <select name="role" class="w-full border p-2 rounded" required>
-                <option value="reception">Receptionist</option>
-                <option value="pharmacist">Pharmacist</option>
-                <option value="lab_technician">Lab Technician</option>
-                <option value="nurse">Nurse</option>
-                <option value="health_officer">Health Officer</option>
+                <option value="Reception">Receptionist</option>
+                <option value="Pharmacist">Pharmacist</option>
+                <option value="Lab_Technician">Lab Technician</option>
+                <option value="Nurse">Nurse</option>
+                <option value="Health_Officer">Health Officer</option>
             </select>
         </div>
 

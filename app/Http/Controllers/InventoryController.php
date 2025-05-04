@@ -62,12 +62,10 @@ class InventoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'category' => 'required|string|max:255',
             'unit' => 'required|string|max:50',
             'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
-            'price' => 'required|numeric|min:0',
             'expiry_date' => 'nullable|date',
             'manufacturer' => 'nullable|string|max:255',
         ]);
@@ -118,11 +116,9 @@ class InventoryController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'category' => 'required|string|max:255',
             'unit' => 'required|string|max:50',
             'reorder_level' => 'required|integer|min:0',
-            'price' => 'required|numeric|min:0',
             'expiry_date' => 'nullable|date',
             'manufacturer' => 'nullable|string|max:255',
         ]);
