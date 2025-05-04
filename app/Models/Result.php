@@ -15,16 +15,13 @@ class Result extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'generic_name',
-        'category',
-        'manufacturer',
-        'dosage_form',
-        'strength',
-        'quantity',
-        'expiry_date',
-        'description',
-        'supplied_date',
+        'patient_id',
+        'tested_by',
+        'disease_type',
+        'dosagsample_typee_form',
+        'result',
+        'Recommendation',
+        'result_date',
     ];
 
     /**
@@ -33,23 +30,18 @@ class Result extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'expiry_date' => 'date',
+        'result_date' => 'date',
     ];
 
-    /**
-     * Get the prescription items for this medicine.
-     */
-    public function prescriptionItems()
-    {
-        return $this->hasMany(PrescriptionItem::class);
-    }
+     public function patient()
+  {
+    return $this->belongsTo(Patient::class);
+  }
 
-    /**
-     * Get the inventory transactions for this medicine.
-     */
-    public function inventoryTransactions()
-    {
-        return $this->hasMany(InventoryTransaction::class);
-    }
+  public function tested_by_user()
+  {
+      return $this->belongsTo(User::class, 'tested_by');
+  }
+  
 }
 

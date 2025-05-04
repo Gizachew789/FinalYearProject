@@ -1,9 +1,18 @@
-<?php 
-public function handle($request, Closure $next)
-{
-    if (auth()->check() && auth()->user()->role === 'admin') {
-        return $next($request);
-    }
+<?php
+namespace App\Http\Middleware;
 
-    abort(403, 'Unauthorized');
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class IsAdmin
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (auth()->check() && auth()->user()->role === 'Admin') {
+            return $next($request);
+        }
+
+        abort(403); // Forbidden
+    }
 }

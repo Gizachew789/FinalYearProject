@@ -24,7 +24,7 @@
                     <tr>
                         <td>{{ $result->id }}</td>
                         <td>{{ $result->patient->name }}</td>
-                        <td>{{ $result->tested_by_user->name }}</td>
+                        <td>{{ $result->tested_by_user?->name ?? 'N/A' }}</td>
                         <td>{{ $result->disease_type }}</td>
                         <td>{{ $result->result }}</td>
                         <td>{{ $result->sample_type }}</td>

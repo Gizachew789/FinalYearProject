@@ -23,7 +23,7 @@
                     <td class="px-4 py-2">{{ $request->test_type }}</td>
                     <td class="px-4 py-2">{{ $request->created_at->format('Y-m-d') }}</td>
                     <td class="px-4 py-2">
-                        <a href="{{ route('lab-technician.requests.show', $request->id) }}" class="text-blue-600 hover:underline">View</a>
+                        <a href="{{ route('staff.lab-requests.show', $request->id) }}" class="text-blue-600 hover:underline">View</a>
                     </td>
                 </tr>
             @endforeach

@@ -19,6 +19,7 @@ class PatientController extends Controller
     {
         $patients = Patient::all();
         return view('admin.patients.index', compact('patients'));
+        
     }
 
     public function create()

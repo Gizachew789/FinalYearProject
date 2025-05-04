@@ -40,7 +40,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // Admin routes
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin'])->group(function () {
     // Admin dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
@@ -156,7 +156,7 @@ Route::prefix('staff')->middleware(['auth'])->name('staff.')->group(function () 
     // Lab Requests 
     Route::get('/lab-requests/create/{id}', [LabRequestController::class, 'create'])->name('lab-requests.create');
     Route::get('/lab-requests/{id}', [LabRequestController::class, 'show'])->name('lab-requests.show');
-    Route::get('/lab-requests', [LabRequestController::class, 'index'])->name('lab.requests.index');
+    Route::get('/lab-requests', [LabRequestController::class, 'index'])->name('lab-requests.index');
     Route::post('/lab-requests/{id}', [LabRequestController::class, 'store'])->name('lab-requests.store');
 
     // Prescriptions

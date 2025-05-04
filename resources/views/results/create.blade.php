@@ -49,7 +49,7 @@
 
         <div class="form-group">
             <label for="recommendation">Recommendation</label>
-            <input type="text" name="recommendation" id="recommendation" class="form-control">
+            <input type="text" name="Recommendation" id="recommendation" class="form-control">
         </div>
 
         <div class="form-group">

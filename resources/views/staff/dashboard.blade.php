@@ -95,20 +95,28 @@
     </div>
 
     {{-- Lab Test Results --}}
-    <div class="card mb-4">
-        <div class="card-header">Lab Test Results</div>
-        <div class="card-body">
-            @if($patient->labResults->isEmpty())
-                <p>No lab test results found.</p>
-            @else
-                <ul>
-                    @foreach($patient->labResults as $result)
-                        <li>{{ $result->test_name }} - {{ $result->result }} ({{ $result->created_at->format('Y-m-d') }})</li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
+   <div class="card mb-4">
+    <div class="card-header">Lab Test Results</div>
+    <div class="card-body">
+        @if($patient->results->isEmpty())
+            <p>No lab test results found.</p>
+        @else
+            <ul>
+                @foreach($patient->results as $result)
+                    <li>
+                        {{ $result->test_name }} - {{ $result->result }} 
+                        ({{ $result->created_at->format('Y-m-d') }})
+                        @if($result->technician)
+                            - Added by: {{ $result->technician->name }}
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        @endif
     </div>
+   </div>
+
+
     @endif
 </div>
 @endsection

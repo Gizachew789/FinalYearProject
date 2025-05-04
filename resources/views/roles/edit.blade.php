@@ -1,4 +1,4 @@
-@extends('layouts.app')
+<!-- @extends('layouts.app')
 
 
 
@@ -23,7 +23,6 @@
     </div>
 
 </div>
-
 
 
 @if (count($errors) > 0)
@@ -98,4 +97,4 @@
 
 
 
-@endsection
+@endsection -->

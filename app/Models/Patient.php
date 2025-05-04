@@ -59,9 +59,16 @@ class Patient extends Model
     }
 
     public function labResults()
-   {
-    return $this->hasMany(Result::class); // Replace Result with your actual model name for lab results
-   }
+    {
+        return $this->hasMany(Result::class); // Updated to use LabResult model for lab results
+    }
+    /**
+     * Get the results for the patient.
+     */
+    public function results()
+    {
+        return $this->hasMany(Result::class); // Updated to use LabResult model for lab results
+    }
 
     /**
      * Get the prescriptions for the patient.
