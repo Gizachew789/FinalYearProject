@@ -10,7 +10,10 @@
 
     <form method="POST" action="{{ route('reception.register.patient.store') }}">
         @csrf
-
+                <div class="mb-4">
+        <label for="id">Patient ID</label>
+        <input type="text" name="id" required class="w-full border p-2 rounded">
+             </div>
         <div class="mb-4">
             <label>Name</label>
             <input type="text" name="name" class="w-full border p-2 rounded" required>

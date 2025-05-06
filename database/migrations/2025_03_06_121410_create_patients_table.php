@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('patients', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->primary(); // manually set string ID as primary key
             $table->string('name');
             $table->enum('gender', ['male', 'female']);
             $table->integer('age')->nullable();
             $table->string('phone')->nullable();
-            $table->string('email');
+            $table->string('email')->unique(); // ensure email is unique
             $table->string('department')->nullable();
             $table->string('year_of_study')->nullable();
             $table->string('blood_group')->nullable();
