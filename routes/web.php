@@ -20,6 +20,7 @@ use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,7 +41,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // Admin routes
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','role:Admin'])->group(function () {
     // Admin dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');

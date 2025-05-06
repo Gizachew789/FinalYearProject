@@ -833,3 +833,13 @@ if (!Auth::user()->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
 
 
     Jossey password  fcBiprgwGh
+
+
+
+
+
+
+
+
+
+    resources/views/app.blade.php

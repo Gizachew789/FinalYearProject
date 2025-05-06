@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NewUserPasswordMail;
+use Spatie\Permission\Models\Role;
 
 class UserRegistrationController extends Controller
 {

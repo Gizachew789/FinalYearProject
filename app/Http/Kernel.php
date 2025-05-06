@@ -48,9 +48,9 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
         // Your custom middleware
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'reception' => \App\Http\Middleware\ReceptionMiddleware::class,
-        'is_admin' => \App\Http\Middleware\IsAdmin::class,
+        // 'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        // 'reception' => \App\Http\Middleware\ReceptionMiddleware::class,
+        // 'is_admin' => \App\Http\Middleware\IsAdmin::class,
 
         // Spatie permission middleware
         'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
