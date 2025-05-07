@@ -36,9 +36,8 @@ class AppointmentController extends Controller
             'appointment_time' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
             'reception_id' => 'required|exists:users,id',
-            'created_by' => 'required|string',
         ]);
-
+        $createdBy = Auth::id(); // Get the ID of the authenticated user
         // Create a new appointment
         Appointment::create([
             'patient_id' => $request->input('patient_id'),
@@ -46,7 +45,7 @@ class AppointmentController extends Controller
             'appointment_time' => $request->input('appointment_time'),
             'reason' => $request->input('reason'),
             'reception_id' => $request->input('reception_id'),
-            'created_by' => $request->input('created_by'),
+            'created_by' => $createdBy,
         ]);
 
         // Redirect to a specific page (e.g., appointment index page)

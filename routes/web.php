@@ -204,12 +204,16 @@ Route::middleware(['auth', 'role:Pharmacist'])->prefix('pharmacist')->name('phar
 
 
 // Patient routes
-Route::prefix('patient')->middleware(['auth', 'role:Patient'])->name('patient.')->group(function () {
+Route::prefix('patient')->middleware(['auth:patient'])->name('patient.')->group(function () {
     Route::get('/dashboard', [PatientAppointmentController::class, 'dashboard'])->name('dashboard');
     
     Route::get('/appointments/create', [PatientAppointmentController::class, 'create'])->name('appointments.create');
     Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/appointments', [PatientAppointmentController::class, 'index'])->name('appointments.index');
+    Route::delete('appointments/cancel', [PatientAppointmentController::class, 'cancel'])->name('appointments.cancel');
+
+    Route::get('/medical-history', [PatientMedicalHistoryController::class, 'index'])->name('medical_history.index');
+
 });
 
 Route::get('/search', [SearchController::class, 'index'])->name('search');

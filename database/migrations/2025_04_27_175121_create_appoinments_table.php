@@ -20,7 +20,6 @@ return new class extends Migration
             $table->time('appointment_time');
             $table->text('reason')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
-            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

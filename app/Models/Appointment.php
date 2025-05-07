@@ -16,11 +16,11 @@ class Appointment extends Model
      */
     protected $fillable = [
         'patient_id',
+        'created_by',
         'appointment_date',
         'appointment_time',
         'reason',
-        'reception_id', // user_id of the receptionist who booked the appointment
-        'created_by', // user_id of who created the appointment
+        'status',
     ];
 
     /**
@@ -38,7 +38,12 @@ class Appointment extends Model
      */
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(Patient::class, 'patient_id');
+    }
+
+    public function reception()
+    {
+        return $this->belongsTo(User::class, 'reception_id');
     }
 
     /**
@@ -56,9 +61,4 @@ class Appointment extends Model
     {
         return $this->hasOne(MedicalRecord::class);
     }
-
-    public function reception()
- {
-    return $this->belongsTo(User::class, 'reception_id');
- }
 }
