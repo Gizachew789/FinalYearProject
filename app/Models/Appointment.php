@@ -19,7 +19,7 @@ class Appointment extends Model
         'appointment_date',
         'appointment_time',
         'reason',
-        'status', // pending, confirmed, cancelled, completed
+        'reception_id', // user_id of the receptionist who booked the appointment
         'created_by', // user_id of who created the appointment
     ];
 

@@ -18,6 +18,7 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\LabRequestController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -99,8 +100,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','role:Admin'])->group
          Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
          Route::get('/patients/{patient_id}', [PatientController::class, 'show'])->name('patients.show');
          Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
-         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
-         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
+         Route::get('/patients/{patient_id}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+         Route::put('/patients/{patient_id}', [PatientController::class, 'update'])->name('patients.update');
          Route::delete('/patients/{patient_id}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 
@@ -210,6 +211,8 @@ Route::prefix('patient')->middleware(['auth', 'role:Patient'])->name('patient.')
     Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
     Route::get('/appointments', [PatientAppointmentController::class, 'index'])->name('appointments.index');
 });
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 
 Auth::routes();

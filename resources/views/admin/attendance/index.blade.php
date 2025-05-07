@@ -7,7 +7,7 @@
     <div class="container">
         <h1>Attendance Management</h1>
 
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>Staff Name</th>
@@ -15,31 +15,23 @@
                     <th>Check-In</th>
                     <th>Check-Out</th>
                     <th>Status</th>
-                    <th>Confirm</th> 
                 </tr>
             </thead>
             <tbody>
-                @foreach ($attendances as $attendance) <!-- Changed back to $attendances -->
+                @foreach ($attendances as $attendance)
                     <tr>
-                        <td>{{ $attendance->patient->name ?? 'Unknown' }}</td>
+                        <td>{{ $attendance->user->name ?? 'Unknown' }}</td> <!-- Changed from 'patient' to 'user' -->
                         <td>{{ $attendance->date }}</td>
                         <td>{{ $attendance->check_in }}</td>
                         <td>{{ $attendance->check_out }}</td>
                         <td>{{ $attendance->status }}</td>
-                    
-                        <td>
-                              <a href="{{ route('admin.attendance.confirm', $attendance->id) }}" class="btn btn-success">Confirm</a>
-                        </td> 
                     </tr>
                 @endforeach
-            </tbody> 
+            </tbody>
         </table>
 
         <!-- Pagination links -->
-        <div>
- 
         <a href="{{ route('admin.attendance.create') }}" class="btn btn-primary">Add Attendance</a>
         {{ $attendances->links() }}
-        </div>
     </div>
 @endsection

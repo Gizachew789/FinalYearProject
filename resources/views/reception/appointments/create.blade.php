@@ -1,6 +1,6 @@
 {{-- resources/views/reception/appointments/create.blade.php --}}
 
-@extends('layouts.app') {{-- you said you are extending 'app.blade.php' not 'layouts.app' --}}
+@extends('layouts.app')
 
 @section('content')
 <div class="max-w-2xl mx-auto p-6 bg-white shadow-md rounded">
@@ -14,7 +14,7 @@
             <label for="patient_id" class="block text-sm font-medium text-gray-700">Patient</label>
             <select name="patient_id" id="patient_id" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">-- Select Patient --</option>
+                <option value="">Patient</option>
                 @foreach($patients as $patient)
                     <option value="{{ $patient->id }}">{{ $patient->name }} ({{ $patient->email }})</option>
                 @endforeach
@@ -39,8 +39,26 @@
         <div class="mb-4">
             <label for="reason" class="block text-sm font-medium text-gray-700">Reason</label>
             <textarea name="reason" id="reason" rows="3"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                ></textarea>
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+        </div>
+
+        {{-- Reception ID --}}
+        <div class="mb-4">
+            <label for="reception_id" class="block text-sm font-medium text-gray-700">Reception</label>
+            <select name="reception_id" id="reception_id" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="">Receptionist </option>
+                @foreach($receptions as $reception)
+                    <option value="{{ $reception->id }}">{{ $reception->name }} ({{ $reception->email }})</option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Created By --}}
+        <div class="mb-4">
+            <label for="created_by" class="block text-sm font-medium text-gray-700">Created By</label>
+            <input type="text" name="created_by" id="created_by" value="{{ auth()->user()->name }}" readonly
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
         </div>
 
         {{-- Submit Button --}}

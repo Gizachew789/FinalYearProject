@@ -62,7 +62,8 @@ class LoginController extends Controller
             return match ($user->role) {
                 'Admin' => redirect()->route('admin.dashboard'),
                 'Reception' => redirect()->route('reception.dashboard'),
-                'Nurse', 'Health_Officer' => redirect()->route('staff.dashboard'),
+                'Nurse' => redirect()->route('staff.dashboard'),
+                'Health_Officer' => redirect()->route('staff.dashboard'),
                 'Lab_Technician' => redirect()->route('lab-technician.dashboard'),
                 'Pharmacist' => redirect()->route('pharmacist.dashboard'),
                 default => redirect('/'), // Default redirect for other roles (e.g., User)
@@ -109,4 +110,5 @@ class LoginController extends Controller
 
         return redirect('/login')->with('message', 'Logged out successfully.');
     }
+        // Handle post-login redirection for all roles, including Patient
 }

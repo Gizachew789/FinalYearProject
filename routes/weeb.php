@@ -835,11 +835,11 @@ if (!Auth::user()->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
     Jossey password  fcBiprgwGh
 
 
+Haile passwor  dN22msatCY
 
 
 
-
-
+Nati  p1NSqv7mPG
 
 
     resources/views/app.blade.php

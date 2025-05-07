@@ -115,6 +115,7 @@ class RolePermissionSeeder extends Seeder
          'attendance-manage', 'report-list', 'report-edit', 'report-delete',
          'report-manage', 'user-list', 'user-create', 'user-edit',
          'user-delete', 'attendance-view', 'attendance-create', 'user-logout',
+         
         ]);
         $pharmacist->givePermissionTo([
         'prescription-accept', 'prescription-list', 'inventory-update',

@@ -43,7 +43,7 @@
                         <td>{{ $patient->email }}</td>
                         <td>{{ $patient->phone }}</td>
                         <td>
-                            <a href="{{ route('admin.patients.show', $patient->id) }}" class="btn btn-sm btn-info mb-1">View</a>
+                        <a href="{{ route('admin.patients.show', ['patient_id' => $patient->id]) }}">View</a>
                             <a href="{{ route('admin.patients.edit', $patient->id) }}" class="btn btn-sm btn-warning mb-1">Edit</a>
                             <form action="{{ route('admin.patients.destroy', $patient->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this patient?');">
                                 @csrf

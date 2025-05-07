@@ -26,7 +26,9 @@ class AttendanceController extends Controller
             $query->whereDate('date', $request->date);
         }
 
+        $attendance = Attendance::latest()->first();
         $attendances = $query->orderBy('date', 'desc')->paginate(10);
+       return view('admin.attendance.index', compact('attendances', 'attendance'));
 
            $user = Auth::user(); // or however you want to get the user
          return view('admin.attendance.index', compact('attendances', 'user'));
@@ -37,26 +39,27 @@ class AttendanceController extends Controller
      * Store a newly created attendance in storage.
      */
     public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id', // updated to user_id
-            'date' => 'required|date',
-            'check_in' => 'required|date_format:Y-m-d H:i:s',
-            'check_out' => 'nullable|date_format:Y-m-d H:i:s|after:check_in',
-            'status' => 'required|in:present,absent,late,half_day',
-        ]);
+   {
+    $validatedData = $request->validate([
+        'user_id' => 'required|exists:users,id',
+        'date' => 'required|date',
+        'check_in' => 'required|date',
+        'check_out' => 'nullable|date',
+        'status' => 'required|string|in:present,absent,late,half_day',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+    // Create a new attendance record
+    Attendance::create([
+        'user_id' => $validatedData['user_id'],
+        'date' => $validatedData['date'],
+        'check_in' => $validatedData['check_in'],
+        'check_out' => $validatedData['check_out'],
+        'status' => $validatedData['status'],
+    ]);
 
-        $attendance = Attendance::create($request->only(['user_id', 'date', 'check_in', 'check_out', 'status'])); // updated to user_id
+    return redirect()->route('admin.attendance.index')->with('success', 'Attendance record added successfully!');
+ }
 
-        return response()->json([
-            'message' => 'Attendance recorded successfully',
-            'attendance' => $attendance->load('user'), // changed staff to user
-        ], 201);
-    }
 
     /**
      * Display the specified attendance.
@@ -87,9 +90,13 @@ class AttendanceController extends Controller
     
 
     // Show attendance form
-  public function create()
-  {
-    $users = User::where('role', '!=', 'user')->get(); // or filter roles as needed
-    return view('admin.attendance.store', compact('users'));
-  }
+    public function create()
+    {
+        // Get all users, or you can add a filter for specific user roles if needed.
+        $users = User::all(); // This gets all users
+    
+        // Return the create view with the list of users
+        return view('admin.attendance.create', compact('users'));
+    }
+    
 }

@@ -63,7 +63,7 @@ class PatientController extends Controller
         }
 
         $patient = Patient::create([
-            'id' => $request->id,
+            'patient_id' => $request->patient_id,
             'name' => $request->name,
             'gender' => $request->gender,
             'age' => $request->age,
@@ -86,9 +86,9 @@ class PatientController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($patient_id)
     {
-        $patient = Patient::find($id);
+        $patient = Patient::find($patient_id);
     
         if (!$patient) {
             return redirect()->route('admin.patients.index')->with('error', 'Patient not found.');
@@ -125,7 +125,7 @@ class PatientController extends Controller
 
 
         $patient->update([
-            'id' => $request->id ?? $patient->id,
+            'patient_id' => $request->id ?? $patient->id,
             'name' => $request->name ?? $patient->name,
             'gender' => $request->gender ?? $patient->gender,
             'age' => $request->age ?? $patient->age,
@@ -144,9 +144,9 @@ class PatientController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($patient_id)
     {
-        $patient = Patient::findOrFail($id); // returns a model instance
+        $patient = Patient::findOrFail($patient_id); // returns a model instance
         $patient->delete();
 
         return redirect()->route('admin.patients.index')->with('success', 'Patient deleted successfully.');

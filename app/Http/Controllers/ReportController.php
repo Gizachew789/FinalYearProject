@@ -20,17 +20,36 @@ class ReportController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * 
+     * 
      */
+    public function __construct()
+    {
+    $this->middleware('auth');
+   
+    $this->middleware('permission:report-manage', ['only' => ['report', 'manage']]);
+  
+     }
+
     public function appointmentReports(Request $request)
     {
-        $user = $request->user();
+       
+ 
+        // $user = $request->user();
+
+        // \Log::info('Current user:', [
+        //     'id' => $user->id,
+        //     'roles' => $user->getRoleNames(),
+        // ]);
         
-        // Only admin and reception can access this
-        if (!$user->isAdmin() && !$user->isReception()) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 403);
-        }
+        // // Only admin and reception can access this
+        // if (!$user->isAdmin() && !$user->isReception()) {
+        //     \Log::warning('Access blocked', [
+        //         'is_admin' => $user->isAdmin(),
+        //         'is_reception' => $user->isReception(),
+        //     ]);
+        //     abort(403, 'Unauthorized');
+        // }
     
         // Date range filter
         $startDate = $request->input('start_date', now()->subMonth());
@@ -63,14 +82,14 @@ class ReportController extends Controller
      */
     public function inventoryReports(Request $request)
 {
-    $user = $request->user();
+    // $user = $request->user();
     
-    // Only admin and users can access this
-    if (!$user->isAdmin()) {
-        return response()->json([
-            'message' => 'Unauthorized',
-        ], 403);
-    }
+    // // Only admin and users can access this
+    // if (!$user->isAdmin()) {
+    //     return response()->json([
+    //         'message' => 'Unauthorized',
+    //     ], 403);
+    // }
 
     // Date range filters
     $startDate = $request->input('start_date', now()->subMonth());
@@ -130,14 +149,14 @@ class ReportController extends Controller
      */
     public function userPerformanceReports(Request $request)
     {
-        $user = $request->user();
+        // $user = $request->user();
     
-        // Only admin and users can access this
-        if (!$user->isAdmin() && !$user->isUser()) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 403);
-        }
+        // // Only admin and users can access this
+        // if (!$user->isAdmin() && !$user->isUser()) {
+        //     return response()->json([
+        //         'message' => 'Unauthorized',
+        //     ], 403);
+        // }
     
         // Date range filter
         $startDate = $request->input('start_date', now()->subMonth());

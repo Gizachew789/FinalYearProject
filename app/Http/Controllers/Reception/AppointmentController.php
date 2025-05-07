@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reception;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -21,23 +22,36 @@ class AppointmentController extends Controller
     public function create()
     { 
         $patients = Patient::all(); // To select the patient while booking
-        return view('reception.appointments.create', compact('patients'));
+        $receptions = User::role('Reception')->get();
+        return view('reception.appointments.create', compact('patients', 'receptions'));
     }
 
     // Store a new appointment
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Validate the incoming request data
+        $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
-            'appointment_time' => 'required',
-            'reason' => 'nullable|string|max:500',
+            'appointment_date' => 'required|date',
+            'appointment_time' => 'required|date_format:H:i',
+            'reason' => 'nullable|string|max:255',
+            'reception_id' => 'required|exists:users,id',
+            'created_by' => 'required|string',
         ]);
 
-        Appointment::create($validated);
+        // Create a new appointment
+        Appointment::create([
+            'patient_id' => $request->input('patient_id'),
+            'appointment_date' => $request->input('appointment_date'),
+            'appointment_time' => $request->input('appointment_time'),
+            'reason' => $request->input('reason'),
+            'reception_id' => $request->input('reception_id'),
+            'created_by' => $request->input('created_by'),
+        ]);
 
+        // Redirect to a specific page (e.g., appointment index page)
         return redirect()->route('reception.appointments.index')->with('success', 'Appointment booked successfully.');
-    }
+    } 
 
     // Optional: View a single appointment
     public function show(Appointment $appointment)
