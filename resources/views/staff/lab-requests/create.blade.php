@@ -4,7 +4,7 @@
 <div class="container">
     <h2 class="mb-4">Request Lab Test for {{ $patient->user->name ?? 'Patient' }}</h2>
 
-    <form action="{{ route('staff.lab-requests.store', $patient->id) }}" method="POST">
+    <form action="{{ route('staff.lab-requests.store', ['patient_id' => $patient->patient_id]) }}" method="POST">
         @csrf
 
         <div class="mb-3">

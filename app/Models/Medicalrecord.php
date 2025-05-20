@@ -24,7 +24,6 @@ class Medicalrecord extends Model
     protected $fillable = [
         'patient_id',
         'created_by',
-        'recorded_by',
         'diagnosis',
         'treatment',
         'prescription',
@@ -48,12 +47,7 @@ class Medicalrecord extends Model
      */
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
-    }
-
-    public function recordedBy()
-    {
-        return $this->belongsTo(User::class, 'recorded_by');
+        return $this->belongsTo(Patient::class, 'patient_id');
     }
 
     public function labResults()

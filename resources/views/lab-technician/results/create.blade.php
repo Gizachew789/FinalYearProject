@@ -4,13 +4,13 @@
 <div class="container">
     <h1>Create Lab Test Result</h1>
 
-    <form action="{{ route('results.store') }}" method="POST">
+    <form action="{{ route('lab.results.store') }}" method="POST">
         @csrf
         <div class="form-group">
             <label for="patient_id">Patient</label>
             <select name="patient_id" id="patient_id" class="form-control">
                 @foreach($patients as $patient)
-                <option value="{{ $patient->id }}">{{ $patient->full_name ?? 'Patient '.$patient->id }}</option>
+                <option value="{{ $patient->patient_id }}">{{ $patient->full_name ?? 'Patient '.$patient->patient_id }}</option>
                 @endforeach
             </select>
         </div>

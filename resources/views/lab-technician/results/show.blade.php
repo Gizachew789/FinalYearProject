@@ -6,11 +6,11 @@
 
         <div class="card">
             <div class="card-header">
-                Result #{{ $result->id }}
+                Result #{{ $result->patient_id }}
             </div>
             <div class="card-body">
-                <p><strong>Patient Name:</strong> {{ $result->patient->name }}</p>
-                <p><strong>Tested By:</strong> {{ $result->tested_by_user->name }}</p>
+                <p><strong>Patient Name:</strong> {{ $result->patient ? $result->patient->name : 'No patient assigned' }}</p>
+                <p><strong>Tested By:</strong> {{ $result->tested_by_user ? $result->tested_by_user->name : 'No user assigned' }}</p>
                 <p><strong>Disease Type:</strong> {{ $result->disease_type }}</p>
                 <p><strong>Sample Type:</strong> {{ $result->sample_type }}</p>
                 <p><strong>Result:</strong> {{ $result->result }}</p>
@@ -19,6 +19,6 @@
             </div>
         </div>
 
-        <a href="{{ route('results.index') }}" class="btn btn-primary mt-3">Back to Results</a>
+        <a href="{{ route('lab.results.index') }}" class="btn btn-primary mt-3">Back to Results</a>
     </div>
 @endsection

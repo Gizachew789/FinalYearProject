@@ -3,222 +3,175 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
-use App\Models\User;
+use App\Models\MedicalRecord;
+use App\Models\MedicalDocument;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PatientController extends Controller
 {
-    /**
-     * Display a listing of the patients.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $patients = Patient::all();
-        return view('admin.patients.index', compact('patients'));
-        
+        $patients = Patient::with(['user', 'labRequests', 'medicalHistory'])->get();
+        return view('staff.patients.index', compact('patients'));
     }
 
     public function create()
-   {
-    return view('admin.patients.create');
-  }
- /**
- * Show the form for editing the specified patient.
- *
- * @param  int  $id
- * @return \Illuminate\Http\Response
- */
-  public function edit($id)
-   {
-    $patient = Patient::with('user')->findOrFail($id);
-    return view('admin.patients.edit', compact('patient'));
-   }
-
-
-    /**
-     * Store a newly created patient in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|string|unique:patients',
-            'name' => 'required|string|max:255',
-            'gender' => 'required|in:male,female,other',
-            'age' => 'required|integer',
-            'phone' => 'required|string|max:15',
-            'email' => 'required|string|email|max:255|unique:users',
-            'department' => 'required|string',
-            'year_of_study' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $patient = Patient::create([
-            'patient_id' => $request->patient_id,
-            'name' => $request->name,
-            'gender' => $request->gender,
-            'age' => $request->age,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'department' => $request->department,
-            'year_of_study' => $request->year_of_study,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return response()->json([
-            'message' => 'Patient created successfully',
-            'patient' => $patient->load('user'),
-        ], 201);
+        return view('admin.patients.create');
     }
 
-    /**
-     * Display the specified patient.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($patient_id)
+    public function show(Patient $patient)
     {
-        $patient = Patient::find($patient_id);
-    
-        if (!$patient) {
-            return redirect()->route('admin.patients.index')->with('error', 'Patient not found.');
-        }
-    
+        $patient = Patient::with(['user', 'labRequests', 'medicalHistory'])->findOrFail($patient->id);
+        Log::info('Patient show', ['patient_id' => $patient->id, 'has_user' => !is_null($patient->user)]);
         return view('admin.patients.show', compact('patient'));
     }
 
-    /**
-     * Update the specified patient in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $patient = Patient::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'id' => 'sometimes|required|string|unique:patients,id,' . $id,
-            'name' => 'sometimes|required|string|max:255',
-            'gender' => 'sometimes|required|in:male,female',
-            'age' => 'sometimes|required|integer',
-            'phone' => 'sometimes|required|string|max:15',
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $patient->user_id,
-            'department' => 'sometimes|required|string',
-            'year_of_study' => 'sometimes|required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-
-        $patient->update([
-            'patient_id' => $request->id ?? $patient->id,
-            'name' => $request->name ?? $patient->name,
-            'gender' => $request->gender ?? $patient->gender,
-            'age' => $request->age ?? $patient->age,
-            'phone' => $request->phone ?? $patient->phone,
-            'email' => $request->email ?? $patient->email,
-            'department' => $request->department ?? $patient->department,
-            'year_of_study' => $request->year_of_study ?? $patient->year_of_study,
-        ]);
-        $patients = Patient::all();
-        return view('admin.patients.index', compact('patients'))->with('message', 'Patient updated successfully');
+    public function showPatient($patientOrId)
+{
+    // Determine if parameter is Patient model or ID:
+    if ($patientOrId instanceof \App\Models\Patient) {
+        $patient = $patientOrId;  // model is auto-resolved by route-model binding
+    } else {
+        // Manual fetch by ID because param is an ID
+        $patient = \App\Models\Patient::with(['user', 'labRequests', 'medicalHistory.createdBy'])
+            ->findOrFail($patientOrId);
     }
 
-    /**
-     * Remove the specified patient from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($patient_id)
-    {
-        $patient = Patient::findOrFail($patient_id); // returns a model instance
-        $patient->delete();
+    // Determine which view to load based on the current route name:
+    $routeName = request()->route()->getName();
 
-        return redirect()->route('admin.patients.index')->with('success', 'Patient deleted successfully.');
-
+    if ($routeName === 'staff.patients.show') {
+        // If route is /patients/{patient}, use this view
+        // (adjust path if needed)
+        return view('staff.patients.show', compact('patient'));
     }
 
-    /**
-     * Get the medical history of the specified patient.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function medicalHistory($id)
-    {
-        $patient = Patient::with('user')->findOrFail($id);
-        $user = auth()->user();
-    
-        // Allow access if:
-        // - the user is the patient themselves
-        // - the user is a Nurse or Health Officer
-        if (
-            $user->id !== $patient->user_id &&
-            !$user->isNurse() &&
-            !$user->isHealthOfficer()
-        ) {
-            abort(403, 'Unauthorized access to patient medical history.');
-        }
-    
-        // Load the patient's medical records and related data
-        $medicalHistory = $patient->medicalRecords()
-            ->with(['prescriptions.items.medication']) // No physician, so just prescriptions
-            ->orderBy('created_at', 'desc')
-            ->get();
-    
-        return view('patients.index', [
-            'patient' => $patient,
-            'medicalHistory' => $medicalHistory,
-        ]);
-    }
-    
-
-    /**
-     * Get the appointment history of the specified patient.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function appointmentHistory($id)
-    {
-        $patient = Patient::with('user')->findOrFail($id);
-        $user = auth()->user();
-    
-        // Authorization: only the patient themselves, nurses, or health officers can access
-        if (
-            $user->id !== $patient->user_id &&
-            !$user->isNurse() &&
-            !$user->isHealthOfficer()
-        ) {
-            abort(403, 'Unauthorized access to patient appointment history.');
-        }
-    
-        // Get the appointment history with relevant relations (e.g., assigned staff)
-        $appointmentHistory = $patient->appointments()
-            ->with(['assignedBy']) // replace 'physician.user' with a valid relation or remove
-            ->orderBy('appointment_date', 'desc')
-            ->get();
-    
-        return view('patients.show', [
-            'patient' => $patient,
-            'appointmentHistory' => $appointmentHistory,
-        ]);
-    }
-    
+    // For the other route 'staff/patients/{patient_id}', load a different blade:
+    return view('admin.patients.show', compact('patient')); 
 }
 
+
+
+    public function edit(Patient $patient)
+    {
+        return view('admin.patients.edit', compact('patient'));
+    }
+
+    public function update(Request $request, Patient $patient)
+    {
+        // Add validation and update logic here
+        $patient->update($request->all());
+        return redirect()->route('admin.patients.show', $patient)->with('success', 'Patient updated successfully');
+    }
+
+    public function destroy(Patient $patient)
+    {
+        $patient->delete();
+        return redirect()->route('admin.patients.index')->with('success', 'Patient deleted successfully');
+    }
+
+    public function search(Request $request)
+    {
+         $patient_id = $request->query('patient_id');
+        $patients = Patient::where('patient_id',$patient_id )
+            // ->orWhereHas('user', function ($q) use ($query) {
+            //     $q->where('name', 'like', "%$query%");
+            // })
+            ->with(['labRequests', 'medicalHistory'])
+            ->first();
+        return view('staff.patients.show', compact('patients'));
+    }
+
+    public function storeMedicalRecord(Request $request, $patient_id)
+    {
+        $patient = Patient::findOrFail($patient_id);
+        // $user = Auth::guard('nurse')->user() ?: Auth::guard('health_officer')->user();
+        // if (!$user) {
+        //     Log::warning('No authenticated staff user found for storing medical record.', ['patient_id' => $patient_id]);
+        //     return redirect()->route('login')->withErrors(['auth' => 'Please log in to store a medical record.']);
+        // }
+
+        $request->validate([
+            'diagnosis' => 'required|string|max:255',
+            'treatment' => 'nullable|string|max:1000',
+            'prescription' => 'nullable|string|max:1000',
+            'visit_date' => 'required|date',
+            'follow_up_date' => 'nullable|date|after_or_equal:visit_date',
+            'lab_results_id' => 'nullable|exists:lab_results,id',
+        ]);
+
+        try {
+            $medicalRecord = MedicalRecord::create([
+                'patient_id' => $patient->id,
+                'created_by' => $user->id,
+                'diagnosis' => $request->diagnosis,
+                'treatment' => $request->treatment,
+                'prescription' => $request->treatment,
+                'visit_date' => $request->visit_date,
+                'follow_up_date' => $request->follow_up_date,
+                'lab_results_id' => $request->lab_results_id,
+            ]);
+
+            Log::info('Medical record created', [
+                'patient_id' => $patient->id,
+                'record_id' => $medicalRecord->id,
+                'created_by' => $user->id
+            ]);
+
+            return redirect()->route('staff.patients.show', $patient->id)
+                ->with('success', 'Medical record created successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to create medical record', [
+                'patient_id' => $patient->id,
+                'error' => $e->getMessage()
+            ]);
+            return back()->withErrors(['error' => 'Failed to create medical record. Please try again.']);
+        }
+    }
+
+    public function uploadMedicalDocument(Request $request, $patient_id)
+    {
+        $patient = Patient::findOrFail($patient_id);
+        // $user = Auth::guard('nurse')->user() ?: Auth::guard('health_officer')->user();
+        // if (!$user) {
+        //     Log::warning('No authenticated staff user found for uploading medical document.', ['patient_id' => $patient_id]);
+        //     return redirect()->route('login')->withErrors(['auth' => 'Please log in to upload a medical document.']);
+        // }
+
+        $request->validate([
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
+        ]);
+
+        try {
+            $file = $request->file('document');
+            $fileType = $file->getClientOriginalExtension() === 'pdf' ? 'pdf' : 'image';
+            $filePath = $file->store('medical_documents', 'public');
+
+            $document = MedicalDocument::create([
+                'patient_id' => $patient->id,
+                'file_path' => $filePath,
+                'file_type' => $fileType,
+
+            ]);
+
+            Log::info('Medical document uploaded', [
+                'patient_id' => $patient->id,
+                'document_id' => $document->id,
+                'file_path' => $filePath
+            ]);
+
+            return redirect()->route('staff.patients.show', $patient->id)
+                ->with('success', 'Medical document uploaded successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to upload medical document', [
+                'patient_id' => $patient->id,
+                'error' => $e->getMessage()
+            ]);
+            return back()->withErrors(['error' => 'Failed to upload medical document. Please try again.']);
+        }
+    }
+}

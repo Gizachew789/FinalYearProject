@@ -16,34 +16,36 @@ class PrescriptionController extends Controller
 {
 
          // Show the form to create a new prescription
-    public function create($patientId)
+    public function create($patient_id)
     {
-        $patient = Patient::findOrFail($patientId);
+        $patient = Patient::findOrFail($patient_id);
         $medications = Medication::all();
 
         return view('staff.prescriptions.create', compact('patient', 'medications'));
     }
 
     // Store the prescription
-    public function store(Request $request, $patientId)
+    public function store(Request $request, $patient_id)
     {
         $request->validate([
             'medication_id' => 'required|integer|exists:medications,id',
             'dosage' => 'required|string|max:255',
             'instructions' => 'nullable|string',
             'frequency' => 'required|string',
+            'duration' => 'required|string|max:255',
         ]);
 
         Prescription::create([
-            'patient_id' => $patientId,
+            'patient_id' => $patient_id,
             'prescriber_id' => Auth::id(),
             'medication_id' => $request->medication_id,
             'dosage' => $request->dosage,
             'instructions' => $request->instructions,
             'frequency' => $request->frequency,
+            'duration' => $request->duration,
         ]);
 
-        return redirect()->route('staff.patients.show', $patientId)->with('success', 'Prescription added successfully.');
+        return redirect()->route('staff.patients.show', ['patient_id' => $patient_id])->with('success', 'Prescription added successfully.');
     }
 
     /**

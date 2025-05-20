@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable; // <-- Change this
 use Illuminate\Notifications\Notifiable;
 
-class Patient extends Authenticatable // <-- Extend Authenticatable instead of Model
+class Patient extends Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -60,23 +61,34 @@ class Patient extends Authenticatable // <-- Extend Authenticatable instead of M
         return $this->hasMany(Appointment::class);
     }
 
-    public function medicalRecords()
+    public function medicalHistory()
     {
-        return $this->hasMany(Medicalrecord::class);
+        return $this->hasMany(MedicalRecord::class, 'patient_id'); 
+    }
+    
+    public function medicalDocuments()
+    {
+        return $this->hasMany(MedicalDocument::class, 'patient_id', 'patient_id');
     }
 
     public function labResults()
     {
-        return $this->hasMany(Result::class);
+        return $this->hasMany(Result::class, 'patient_id');
     }
 
     public function results()
     {
-        return $this->hasMany(Result::class);
+        return $this->hasMany(Result::class, 'patient_id');
     }
 
     public function prescriptions()
     {
-        return $this->hasMany(Prescription::class);
+        return $this->hasMany(Prescription::class, 'patient_id');
+    }
+
+    public function labRequests()
+    {
+        return $this->hasMany(LabRequest::class, 'patient_id', 'patient_id');
     }
 }
+

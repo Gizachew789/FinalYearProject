@@ -8,107 +8,81 @@ use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
-    // Show login form
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Handle login
     public function login(Request $request)
     {
-        // Validate login inputs
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // Attempt to authenticate as a User (staff)
         $user = User::where('email', $request->email)->first();
 
-        // Check if user exists and password is correct
         if ($user && Hash::check($request->password, $user->password)) {
-            // Based on role, authenticate with the corresponding guard
-            switch ($user->role) {
-                case 'Admin':
-                    Auth::guard('admin')->login($user);
-                    break;
-                case 'Reception':
-                    Auth::guard('reception')->login($user);
-                    break;
-                case 'Lab_Technician':
-                    Auth::guard('lab_technician')->login($user);
-                    break;
-                case 'Pharmacist':
-                    Auth::guard('pharmacist')->login($user);
-                    break;
-                case 'Nurse':
-                    Auth::guard('nurse')->login($user);
-                    break;
-                case 'Health_Officer':
-                    Auth::guard('health_officer')->login($user);
-                    break;
-                default:
-                    Auth::guard('web')->login($user);
-            }
+            $role = $user->getRoleNames()->first();
+            Log::info('Login attempt', [
+                'email' => $request->email,
+                'role' => $role ?? 'N/A'
+            ]);
 
-            // Regenerate session to avoid session fixation
+            // Authenticate with the correct guard based on role
+            $guard = match ($role) {
+                'Admin' => 'admin',
+                'Reception' => 'reception',
+                'Lab_Technician' => 'lab_technician',
+                'Pharmacist' => 'pharmacist',
+                'Nurse' => 'nurse',
+                'Health_Officer' => 'health_officer',
+                default => 'web',
+            };
+            Auth::guard($guard)->login($user);
+            Log::info('Is user authenticated after login?', ['status' => Auth::guard($guard)->check(), 'guard' => $guard]);
+
             $request->session()->regenerate();
 
-            // Redirect based on the user's role
-            return match ($user->role) {
+            // Redirect based on role
+            return match ($role) {
                 'Admin' => redirect()->route('admin.dashboard'),
                 'Reception' => redirect()->route('reception.dashboard'),
-                'Nurse' => redirect()->route('staff.dashboard'),
-                'Health_Officer' => redirect()->route('staff.dashboard'),
-                'Lab_Technician' => redirect()->route('lab-technician.dashboard'),
+                'Nurse', 'Health_Officer' => redirect()->route('staff.dashboard'),
+                'Lab_Technician' => redirect()->route('lab.dashboard'),
                 'Pharmacist' => redirect()->route('pharmacist.dashboard'),
-                default => redirect('/'), // Default redirect for other roles (e.g., User)
+                default => redirect('/'),
             };
         }
 
-        // Attempt to authenticate as a Patient
         $patient = Patient::where('email', $request->email)->first();
-
         if ($patient && Hash::check($request->password, $patient->password)) {
             Auth::guard('patient')->login($patient);
+            Log::info('Is patient authenticated after login?', ['status' => Auth::guard('patient')->check()]);
             $request->session()->regenerate();
             return redirect()->route('patient.dashboard');
         }
 
-        // If authentication fails for both User and Patient
         return back()->withErrors([
             'email' => 'Invalid credentials.',
         ])->withInput();
     }
 
-    // Logout functionality
     public function logout(Request $request)
     {
-        // Logout from all possible guards
-        if (Auth::guard('web')->check()) {
-            Auth::guard('web')->logout();
-        }
-        if (Auth::guard('patient')->check()) {
-            Auth::guard('patient')->logout();
+        foreach (['web', 'admin', 'reception', 'lab_technician', 'pharmacist', 'nurse', 'health_officer', 'patient'] as $guard) {
+            if (Auth::guard($guard)->check()) {
+                Auth::guard($guard)->logout();
+            }
         }
 
-        // Logout guards for other roles
-        Auth::guard('admin')->logout();
-        Auth::guard('reception')->logout();
-        Auth::guard('lab_technician')->logout();
-        Auth::guard('pharmacist')->logout();
-        Auth::guard('nurse')->logout();
-        Auth::guard('health_officer')->logout();
-
-        // Invalidate and regenerate session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect('/login')->with('message', 'Logged out successfully.');
     }
-        // Handle post-login redirection for all roles, including Patient
 }

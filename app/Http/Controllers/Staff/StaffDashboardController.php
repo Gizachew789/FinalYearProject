@@ -13,6 +13,9 @@ class StaffDashboardController extends Controller
      *
      * @return \Illuminate\View\View
      */
+    $appointments = Appointment::with('patient')->get();
+
+    
     public function index()
     {
         $user = Auth::user();
@@ -30,6 +33,6 @@ class StaffDashboardController extends Controller
                 break;
         }
 
-        return view('staff.dashboard', compact('user'));
+        return view('staff.dashboard', compact('user', 'appointments', 'patient'));
     }
 }

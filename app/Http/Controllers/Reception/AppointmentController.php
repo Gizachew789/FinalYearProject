@@ -11,12 +11,32 @@ use Illuminate\Http\Request;
 class AppointmentController extends Controller
 {
     // Display all appointments
-    public function index()
-    {
-        $appointments = Appointment::with('patient')->latest()->get(); // eager load patient
+  public function index(Request $request)
+{
+    $query = Appointment::with('patient');
 
-        return view('reception.appointments.index', compact('appointments'));
+    if ($search = $request->input('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('patient', function ($q2) use ($search) {
+                $q2->where('name', 'like', "%{$search}%")
+                   ->orWhere('patient_id', $search);
+            })
+            ->orWhere('appointment_date', 'like', "%{$search}%")
+            ->orWhere('status', 'like', "%{$search}%");
+        });
     }
+
+    $appointments = $query->latest()->get();
+
+    // Dynamically choose view for staff or reception
+    $view = view()->exists('staff.appointments.index')
+        ? 'staff.appointments.index'
+        : 'reception.appointments.index';
+
+    return view($view, compact('appointments'));
+}
+
+
 
     // Show the appointment creation form
     public function create()
@@ -31,7 +51,7 @@ class AppointmentController extends Controller
     {
         // Validate the incoming request data
         $request->validate([
-            'patient_id' => 'required|exists:patients,id',
+            'patient_id' => 'required|exists:patients,patient_id',
             'appointment_date' => 'required|date',
             'appointment_time' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
@@ -69,7 +89,7 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment)
     {
         $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
+            'patient_id' => 'required|exists:patients,patient_id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
             'reason' => 'nullable|string|max:500',
@@ -79,20 +99,48 @@ class AppointmentController extends Controller
 
         return redirect()->route('reception.appointments.index')->with('success', 'Appointment updated successfully.');
     }
-
-    public function accept($id)
-  {
-    $appointment = Appointment::findOrFail($id);
-    $appointment->status = 'confirmed';
-    $appointment->save();
-
-    return redirect()->back()->with('success', 'Appointment accepted successfully.');
-  }
+    public function accept($patientId)
+    {
+        $appointment = Appointment::where('patient_id', $patientId)->first();
+    
+        if (!$appointment) {
+            return redirect()->route('staff.dashboard')->with('error', 'Appointment not found.');
+        }
+    
+        // Complete the appointment
+        $appointment->status = 'completed';
+        $appointment->save();
+    
+        return view('staff.appointments.accept', compact('appointment'));
+    }
+    
 
     // Optional: Delete appointment
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
-        return redirect()->route('reception.appointments.index')->with('success', 'Appointment deleted successfully.');
+        return redirect()->route('staff.appointments.index')->with('success', 'Appointment deleted successfully.');
     }
+
+//     public function search(Request $request)
+// {
+//     $request->validate([
+//         'search' => 'required|string',
+//     ]);
+//  $search =$request->query("search");
+//     $appointments = Appointment::with('patient')
+//         ->where('patient_id', $search)
+//         ->get();
+
+//     return view('staff.appointments.show', compact('appointments')); // or whichever view contains your modal
+// }
+
+public function showappointment(){
+    $appointments = Appointment::get();
+    return view('staff.appointments.show', compact('appointments')); // or whichever view contains your modal
  }
+
+ }
+
+
+ 

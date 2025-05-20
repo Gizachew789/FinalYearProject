@@ -18,10 +18,6 @@
         @if($patient->year_of_study)
             <p><strong>Year of Study:</strong> {{ $patient->year_of_study }}</p>
         @endif
-        @if($patient->blood_group)
-            <p><strong>Blood Group:</strong> {{ $patient->blood_group }}</p>
-        @endif
-    </div>
 
     <h3 class="mb-3">Appointments</h3>
     @forelse($patient->appointments as $appointment)

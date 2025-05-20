@@ -28,6 +28,34 @@
         </div>
     </div>
 
+            <!-- patient Header -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
+            <div class="container-fluid">
+                <!-- <button class="btn btn-primary" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button> -->
+                <div class="ms-auto d-flex align-items-center">
+                    <span class="me-3">Welcome, {{ Auth::user()->name }}</span>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('logout') }}" 
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
     <!-- Page Content -->
     <div id="page-content-wrapper" class="w-100" style="margin-left: 250px;">
         <!-- Patient Header -->

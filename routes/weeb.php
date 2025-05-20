@@ -841,5 +841,946 @@ Haile passwor  dN22msatCY
 
 Nati  p1NSqv7mPG
 
+Abeni Bnyffa5UwH
 
     resources/views/app.blade.php
+
+
+
+
+
+    //////
+    @extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Welcome, {{ $user->name }}</h1>
+    <p class="mb-4">This is your shared staff dashboard.</p>
+
+    {{-- Appointments Section --}}
+    <div class="card mb-4">
+        <div class="card-header">Booked Appointments</div>
+        <div class="card-body">
+            @if($appointments->isEmpty())
+                <p>No appointments available.</p>
+            @else
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($appointments as $appointment)
+                            <tr>
+                            <td>{{ $appointment->patient->name }}</td>
+                                <td>{{ $appointment->appointment_date }}</td>
+                                <td>{{ $appointment->appointment_time }}</td>
+                                <td>{{ ucfirst($appointment->status) }}</td>
+                                <td>
+                                  @if($appointment->status == 'pending')
+                               <form method="POST" action="{{ route('staff.appointments.accept', $appointment->patient_id) }}">
+                                  @csrf
+                                 <button type="submit" class="btn btn-sm btn-success mb-1">Accept</button>
+                                 </form>
+                               @else
+                                     <a href="{{ route('staff.patients.show', $appointment->patient_id) }}" class="btn btn-sm btn-primary mb-1">View</a>
+                                 <a href="{{ route('staff.lab-requests.create', ['patient_id' => $appointment->patient_id]) }}" class="btn btn-sm btn-outline-secondary mb-1">Lab Test</a>
+                                 <a href="{{ route('staff.prescriptions.create', ['patient_id' => $appointment->patient_id]) }}" class="btn btn-sm btn-outline-secondary">Prescribe</a>
+                               @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
+
+    {{-- Medical History Section --}}
+    @if(isset($patient))
+    <div class="card mb-4">
+        <div class="card-header">Medical History - {{ $patient->name }}</div>
+        <div class="card-body">
+            @if($patient->medicalRecords->isEmpty())
+                <p>No medical records found.</p>
+            @else
+                <ul>
+                    @foreach($patient->medicalRecords as $record)
+                        <li>{{ $record->created_at->format('Y-m-d') }}: {{ $record->summary }}</li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+    </div>
+
+    {{-- Upload New Medical Record --}}
+    <div class="card mb-4">
+        <div class="card-header">Upload New Medical Document</div>
+        <div class="card-body">
+            <form action="{{ route('staff.medical_records.store', ['patient_id' => $patient->id]) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="form-group">
+                    <label for="document">Medical Document (PDF or Image)</label>
+                    <input type="file" name="document" class="form-control" required>
+                </div>
+                <div class="form-group mt-2">
+                    <label for="notes">Notes</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="Enter summary or notes..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Upload</button>
+            </form>
+        </div>
+    </div>
+ 
+
+    {{-- Lab Test Results --}}
+   <div class="card mb-4">
+    <div class="card-header">Lab Test Results</div>
+    <div class="card-body">
+        @if($patient->results->isEmpty())
+            <p>No lab test results found.</p>
+        @else
+            <ul>
+                @foreach($patient->results as $result)
+                    <li>
+                        {{ $result->disease_type }} - {{ $result->result }} 
+                        ({{ $result->result_date->format('Y-m-d') }})
+                        @if($result->testedBy) <!-- Assuming the 'testedBy' is the relationship name for technician -->
+                            - Added by: {{ $result->testedBy->name }}
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </div>
+   </div>
+
+
+
+    @endif
+</div>
+@endsection
+///////////////////////////////////////////////////////////
+<?php
+
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Patient\PatientMedicalHistoryController;
+use App\Http\Controllers\ResultController;
+use App\Http\Controllers\Admin\UserRegistrationController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LabReportController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\Auth\PatientRegistrationController;
+use App\Http\Controllers\Reception\AppointmentController;
+use App\Http\Controllers\Patient\PatientAppointmentController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PharmacistDashboardController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\LabRequestController;
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SearchController;
+use Illuminate\Support\Facades\Route;
+
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public routes
+Route::get('/', function () {
+    return view('welcome');
+});
+
+     Route::resource('roles', RoleController::class);
+
+// Authentication routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->middleware(['auth','role:Admin'])->group(function () {
+    // Admin dashboard
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+
+    // Staff registration
+     Route::get('/register-user', [UserRegistrationController::class, 'create'])->name('register.user');
+    Route::post('/register-user', [UserRegistrationController::class, 'store'])->name('register.user.store'); 
+
+    // User management
+    Route::get('/users/create', [UserRegistrationController::class, 'create'])->name('users.create');
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Reports management
+    
+       // Appointment Reports
+       Route::get('/reports/appointments', [ReportController::class, 'appointmentReports'])
+       ->name('reports.appointments'); // Generate appointment reports (by status, reception, day)
+
+   // Inventory Reports
+   Route::get('/reports/inventory', [ReportController::class, 'inventoryReports'])
+       ->name('reports.inventory'); // Generate inventory reports (low stock, most used medications)
+
+   // User Performance Reports
+   Route::get('/reports/user-performance', [ReportController::class, 'userPerformanceReports'])
+       ->name('reports.userPerformance'); // Generate user performance reports (appointments, medical records, prescriptions)
+
+   // Export Reports
+   Route::get('/reports/export/{type}', [ReportController::class, 'exportReport'])
+       ->name('reports.export'); // Export reports as CSV or PDF (appointments, inventory, user performance)
+    
+    // Attendance management
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index'); // View all attendance records
+    Route::get('/attendance/{user}', [AttendanceController::class, 'show'])->name('attendance.show'); // View a specific user's attendance
+    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/{user}/confirm', [AttendanceController::class, 'confirmForm'])->name('attendance.confirm'); // Confirm a user's attendance
+    Route::get('/attendance/create', [AttendanceController::class, 'create'])->name('attendance.create');
+    Route::post('/attendance/{user}/confirm', [AttendanceController::class, 'confirm'])->name('attendance.confirm'); // Confirm a user's attendance
+
+    // Inventory management
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index'); // View all inventory items
+    Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create'); // Create a new inventory item
+    Route::get('/inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');  
+    Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store'); // Store a new inventory item
+    Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit'); // Edit an inventory item
+    Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update'); // Update an inventory item
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy'); // Delete an inventory item
+    Route::get('/inventory/low-stock', [InventoryController::class, 'lowStock'])->name('inventory.lowStock'); // view low stock item
+ 
+         // patient management
+         Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+         Route::get('/patients/{patient_id}', [PatientController::class, 'show'])->name('patients.show');
+         Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+         Route::get('/patients/{patient_id}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+         Route::put('/patients/{patient_id}', [PatientController::class, 'update'])->name('patients.update');
+         Route::delete('/patients/{patient_id}', [PatientController::class, 'destroy'])->name('patients.destroy');
+
+
+});
+
+
+// @if (Route::has('register'))
+//     <p>Register route exists!</p>
+//     <a href="{{ route('register') }}">Register</a>
+// @endif
+
+// Reception routes
+Route::prefix('reception')->name('reception.')->middleware(['auth', 'role:Reception'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('reception.dashboard');
+    })->name('dashboard');
+
+    // Patient registration
+    Route::get('/register-patient', [PatientRegistrationController::class, 'showRegistrationForm'])->name('register.patient');
+    Route::post('/register/patient', [PatientRegistrationController::class, 'register'])->name('register.patient.store');
+
+    // Appointment booking
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+     Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
+
+
+});
+
+
+
+// Bsc_Nurse, Nurse and HealthOfficer routes
+Route::prefix('staff')->middleware(['auth', 'role:Nurse|Health_Officer'])->name('staff.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard');
+
+
+    // Appointments
+    Route::post('/appointments/{patient}/accept', [AppointmentController::class, 'accept'])->name('appointments.accept');
+
+    // Patients
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    Route::get('/patients/{patient_id}', [PatientController::class, 'showPatient'])->name('patients.show');
+
+    // Medical Records
+    Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('medical_records.store');
+
+    // Lab Requests
+    Route::get('/lab-requests/create/{patient_id}', [LabRequestController::class, 'create'])->name('lab-requests.create');
+    Route::get('/lab-requests/{patient_id}', [LabRequestController::class, 'show'])->name('lab-requests.show');
+    Route::get('/lab-requests', [LabRequestController::class, 'index'])->name('lab-requests.index');
+    Route::post('/lab-requests/{patient_id}', [LabRequestController::class, 'store'])->name('lab-requests.store');
+
+    // Prescriptions
+    Route::get('/prescriptions/create/{patient_id}', [PrescriptionController::class, 'create'])->name('prescriptions.create');
+    Route::post('/prescriptions/{patient_id}', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+
+    // Lab Results
+    Route::get('/lab-results/{patient_id}', [ResultController::class, 'index'])->name('lab-results.index');
+    Route::post('/lab-results', [ResultController::class, 'store'])->name('lab-results.store');
+
+    Route::get('/medical_records', [PatientMedicalHistoryController::class, 'index'])->name('medical_history.index');
+    Route::get('/medical_records/{patient_id}', [PatientMedicalHistoryController::class, 'show'])->name('medical_history.show');
+    Route::get('/medical_records/{patient_id}/edit', [PatientMedicalHistoryController::class, 'edit'])->name('medical_history.edit');
+    Route::post('/medical_records/{patient_id}', [PatientMedicalHistoryController::class, 'store'])->name('medical_history.store');
+    Route::get('/medical_records/{patient_id}/create', [PatientMedicalHistoryController::class, 'cre    ate'])->name('medical_history.create');
+});
+    Route::get('/patients/search', [PatientController::class, 'search'])->name('staff.patients.search');
+    Route::get('/lab_results/search', [ResultController::class, 'search'])->name('lab-results.search');
+
+
+// Result routes
+Route::resource('results', ResultController::class);
+
+// LabReport routes
+Route::resource('lab_reports', LabReportController::class);
+
+// Lab Technician routes
+Route::prefix('lab-technician')->name('lab.')->middleware(['auth', 'role:Lab_Technician'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('lab-technician.dashboard');
+    })->name('dashboard');
+
+    Route::get('/requests', [LabRequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/{patient_id}', [LabRequestController::class, 'show'])->name('requests.show');
+    Route::get('/requests/{patient_id}/accept', [LabRequestController::class, 'accept'])->name('requests.accept');
+    
+    Route::get('/results/create', [ResultController::class, 'create'])->name('results.create');
+    Route::post('/results/store', [ResultController::class, 'store'])->name('results.store');
+    Route::get('/results/{result_id}', [ResultController::class, 'show'])->name('results.show');
+    Route::delete('/results/{result_id}', [ResultController::class, 'destroy'])->name('results.destroy');
+    Route::get('/results/{patient_id}', [ResultController::class, 'index'])->name('results.index'); // fixed route definition
+});
+
+
+// Pharmacist routes
+Route::middleware(['auth', 'role:Pharmacist'])->prefix('pharmacist')->name('pharmacist.')->group(function () {
+    Route::get('/dashboard', [PharmacistDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/prescriptions/{id}/dispense', [PharmacistDashboardController::class, 'dispense'])->name('prescriptions.dispense');
+    Route::get('/prescriptions/{id}', [PharmacistDashboardController::class, 'show'])->name('prescriptions.show');
+    Route::get('/prescriptions', [PharmacistDashboardController::class, 'index'])->name('prescriptions.index');
+});
+
+
+// Patient routes
+Route::prefix('patient')->middleware(['auth:patient'])->name('patient.')->group(function () {
+    Route::get('/dashboard', [PatientAppointmentController::class, 'dashboard'])->name('dashboard');
+    
+    Route::get('/appointments/create', [PatientAppointmentController::class, 'create'])->name('appointments.create');
+    Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments', [PatientAppointmentController::class, 'index'])->name('appointments.index');
+    Route::delete('appointments/cancel', [PatientAppointmentController::class, 'cancel'])->name('appointments.cancel');
+
+    Route::get('/medical-history', [PatientMedicalHistoryController::class, 'index'])->name('medical_history.index');
+
+});
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+ it is like this is there a problem in it
+
+
+ ///////////////////////////////////////////
+ [2025-05-20 06:37:47] local.INFO: Is user authenticated after login? {"status":true}   the authentication is returning true but still it is getting me back to the login page <?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Patient;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
+class LoginController extends Controller
+{
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            $role = $user->getRoleNames()->first(); // get role from Spatie
+            Log::info('Login attempt', [
+                'email' => $request->email,
+                'role' => $role ?? 'N/A'
+            ]);
+Auth::guard('admin')->login($user);
+Log::info('Is user authenticated after login?', ['status' => Auth::guard('admin')->check()]);
+            // Authenticate with the correct guard based on role
+            match ($role) {
+                'Admin' => Auth::guard('admin')->login($user),
+                'Reception' => Auth::guard('reception')->login($user),
+                'Lab_Technician' => Auth::guard('lab_technician')->login($user),
+                'Pharmacist' => Auth::guard('pharmacist')->login($user),
+                'Nurse' => Auth::guard('nurse')->login($user),
+                'Health_Officer' => Auth::guard('health_officer')->login($user),
+                default => Auth::guard('web')->login($user),
+            };
+
+            $request->session()->regenerate();
+
+            // Redirect based on role
+            return match ($role) {
+                'Admin' => redirect()->route('admin.dashboard'),
+                'Reception' => redirect()->route('reception.dashboard'),
+                'Nurse', 'Health_Officer' => redirect()->route('staff.dashboard'),
+                'Lab_Technician' => redirect()->route('lab-technician.dashboard'),
+                'Pharmacist' => redirect()->route('pharmacist.dashboard'),
+                default => redirect('/'),
+            };
+        }
+
+        // Authenticate patient if no matching staff user
+        $patient = Patient::where('email', $request->email)->first();
+        if ($patient && Hash::check($request->password, $patient->password)) {
+            Auth::guard('patient')->login($patient);
+            $request->session()->regenerate();
+            return redirect()->route('patient.dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Invalid credentials.',
+        ])->withInput();
+    }
+
+    public function logout(Request $request)
+    {
+        foreach (['web', 'admin', 'reception', 'lab_technician', 'pharmacist', 'nurse', 'health_officer', 'patient'] as $guard) {
+            if (Auth::guard($guard)->check()) {
+                Auth::guard($guard)->logout();
+            }
+        }
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login')->with('message', 'Logged out successfully.');
+    }
+}
+
+
+
+
+
+/////////////////////////////////////////
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Appointment;
+use App\Models\Patient;
+use Illuminate\Support\Facades\Log;
+
+class DashboardController extends Controller
+{
+    public function staffDashboard()
+    {
+        $user = Auth::user();
+
+        // Load all appointments for staff to view
+        $appointments = Appointment::with(['patient.user'])
+            ->orderBy('appointment_date', 'asc')
+            ->get();
+            // Try to get a patient associated with the first valid appointment
+            $patient = null;
+           
+
+            foreach ($appointments as $appointment) {
+                if ($appointment->patient ) {
+                    $patient = Patient::with(['user', 'medicalRecords', 'labResults', 'prescriptions'])
+                    ->find($appointment->patient_id);
+                    break; // Only load the first available patient
+                }
+            }
+            Log::info('A loaded for staff dashboard', ['patient' => $patient]);
+
+        return view('staff.dashboard', [
+            'user' => $user,
+            'appointments' => $appointments,
+            'patient' => $patient,
+        ]);
+    }
+}
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+<?php
+
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Patient\PatientMedicalHistoryController;
+use App\Http\Controllers\ResultController;
+use App\Http\Controllers\Admin\UserRegistrationController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LabReportController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\Auth\PatientRegistrationController;
+use App\Http\Controllers\Reception\AppointmentController;
+use App\Http\Controllers\Patient\PatientAppointmentController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PharmacistDashboardController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\LabRequestController;
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SearchController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Public routes
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::resource('roles', RoleController::class);
+
+// Authentication routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Admin routes
+Route::prefix('admin')->name('admin.')->middleware(['auth:admin', 'role:Admin'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+
+    // Staff registration
+    Route::get('/register-user', [UserRegistrationController::class, 'create'])->name('register.user');
+    Route::post('/register-user', [UserRegistrationController::class, 'store'])->name('register.user.store');
+
+    // User management
+    Route::get('/users/create', [UserRegistrationController::class, 'create'])->name('users.create');
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Reports management
+    Route::get('/reports/appointments', [ReportController::class, 'appointmentReports'])->name('reports.appointments');
+    Route::get('/reports/inventory', [ReportController::class, 'inventoryReports'])->name('reports.inventory');
+    Route::get('/reports/user-performance', [ReportController::class, 'userPerformanceReports'])->name('reports.userPerformance');
+    Route::get('/reports/export/{type}', [ReportController::class, 'exportReport'])->name('reports.export');
+
+    // Attendance management
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/{user}', [AttendanceController::class, 'show'])->name('attendance.show');
+    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/{user}/confirm', [AttendanceController::class, 'confirmForm'])->name('attendance.confirm');
+    Route::get('/attendance/create', [AttendanceController::class, 'create'])->name('attendance.create');
+    Route::post('/attendance/{user}/confirm', [AttendanceController::class, 'confirm'])->name('attendance.confirm');
+
+    // Inventory management
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::get('/inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
+    Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
+    Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update');
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    Route::get('/inventory/low-stock', [InventoryController::class, 'lowStock'])->name('inventory.lowStock');
+
+    // Patient management
+    Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+    Route::get('/patients/{patient_id}', [PatientController::class, 'show'])->name('patients.show');
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    Route::get('/patients/{patient_id}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+    Route::put('/patients/{patient_id}', [PatientController::class, 'update'])->name('patients.update');
+    Route::delete('/patients/{patient_id}', [PatientController::class, 'destroy'])->name('patients.destroy');
+});
+
+// Reception routes
+Route::prefix('reception')->name('reception.')->middleware(['auth:reception', 'role:Reception'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('reception.dashboard');
+    })->name('dashboard');
+
+    // Patient registration
+    Route::get('/register-patient', [PatientRegistrationController::class, 'showRegistrationForm'])->name('register.patient');
+    Route::post('/register/patient', [PatientRegistrationController::class, 'register'])->name('register.patient.store');
+
+    // Appointment booking
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
+});
+
+// Nurse and Health Officer routes
+Route::prefix('staff')->middleware(['auth:nurse,health_officer', 'role:Nurse|Health_Officer'])->name('staff.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'staffDashboard'])->name('dashboard');
+
+    // Appointments
+    Route::post('/appointments/{patient}/accept', [AppointmentController::class, 'accept'])->name('appointments.accept');
+
+    // Patients
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+    Route::get('/patients/{patient_id}', [PatientController::class, 'showPatient'])->name('patients.show');
+
+    // Medical Records
+    Route::post('/medical-records', [MedicalRecordController::class, 'store'])->name('medical_records.store');
+
+    // Lab Requests
+    Route::get('/lab-requests/create/{patient_id}', [LabRequestController::class, 'create'])->name('lab-requests.create');
+    Route::get('/lab-requests/{patient_id}', [LabRequestController::class, 'show'])->name('lab-requests.show');
+    Route::get('/lab-requests', [LabRequestController::class, 'index'])->name('lab-requests.index');
+    Route::post('/lab-requests/{patient_id}', [LabRequestController::class, 'store'])->name('lab-requests.store');
+
+    // Prescriptions
+    Route::get('/prescriptions/create/{patient_id}', [PrescriptionController::class, 'create'])->name('prescriptions.create');
+    Route::post('/prescriptions/{patient_id}', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+
+    // Lab Results
+    Route::get('/lab-results/{patient_id}', [ResultController::class, 'index'])->name('lab-results.index');
+    Route::post('/lab-results', [ResultController::class, 'store'])->name('lab-results.store');
+
+    Route::get('/medical_records', [PatientMedicalHistoryController::class, 'index'])->name('medical_history.index');
+    Route::get('/medical_records/{patient_id}', [PatientMedicalHistoryController::class, 'show'])->name('medical_history.show');
+    Route::get('/medical_records/{patient_id}/edit', [PatientMedicalHistoryController::class, 'edit'])->name('medical_history.edit');
+    Route::post('/medical_records/{patient_id}', [PatientMedicalHistoryController::class, 'store'])->name('medical_history.store');
+    Route::get('/medical_records/{patient_id}/create', [PatientMedicalHistoryController::class, 'create'])->name('medical_history.create');
+});
+
+Route::get('/patients/search', [PatientController::class, 'search'])->name('staff.patients.search');
+Route::get('/lab_results/search', [ResultController::class, 'search'])->name('lab-results.search');
+
+// Result routes
+Route::resource('results', ResultController::class);
+
+// LabReport routes
+Route::resource('lab_reports', LabReportController::class);
+
+// Lab Technician routes
+Route::prefix('lab-technician')->name('lab.')->middleware(['auth:lab_technician', 'role:Lab_Technician'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('lab-technician.dashboard');
+    })->name('dashboard');
+
+    Route::get('/requests', [LabRequestController::class, 'index'])->name('requests.index');
+    Route::get('/requests/{patient_id}', [LabRequestController::class, 'show'])->name('requests.show');
+    Route::get('/requests/{patient_id}/accept', [LabRequestController::class, 'accept'])->name('requests.accept');
+
+    Route::get('/results/create', [ResultController::class, 'create'])->name('results.create');
+    Route::post('/results/store', [ResultController::class, 'store'])->name('results.store');
+    Route::get('/results/{result_id}', [ResultController::class, 'show'])->name('results.show');
+    Route::delete('/results/{result_id}', [ResultController::class, 'destroy'])->name('results.destroy');
+    Route::get('/results/{patient_id}', [ResultController::class, 'index'])->name('results.index');
+});
+
+// Pharmacist routes
+Route::middleware(['auth:pharmacist', 'role:Pharmacist'])->prefix('pharmacist')->name('pharmacist.')->group(function () {
+    Route::get('/dashboard', [PharmacistDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/prescriptions/{id}/dispense', [PharmacistDashboardController::class, 'dispense'])->name('prescriptions.dispense');
+    Route::get('/prescriptions/{id}', [PharmacistDashboardController::class, 'show'])->name('prescriptions.show');
+    Route::get('/prescriptions', [PharmacistDashboardController::class, 'index'])->name('prescriptions.index');
+});
+
+// Patient routes
+Route::prefix('patient')->middleware(['auth:patient'])->name('patient.')->group(function () {
+    Route::get('/dashboard', [PatientAppointmentController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/appointments/create', [PatientAppointmentController::class, 'create'])->name('appointments.create');
+    Route::post('/appointments', [PatientAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('/appointments', [PatientAppointmentController::class, 'index'])->name('appointments.index');
+    Route::delete('/appointments/cancel', [PatientAppointmentController::class, 'cancel'])->name('appointments.cancel');
+
+    Route::get('/medical-history', [PatientMedicalHistoryController::class, 'index'])->name('medical_history.index');
+});
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+
+//////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Patient;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+
+class PatientController extends Controller
+{
+    /**
+     * Display a listing of the patients.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $patients = Patient::all();
+        return view('admin.patients.index', compact('patients'));
+        
+    }
+
+    public function create()
+   {
+    return view('admin.patients.create');
+  }
+ /**
+ * Show the form for editing the specified patient.
+ *
+ * @param  int  $id
+ * @return \Illuminate\Http\Response
+ */
+  public function edit($id)
+   {
+    $patient = Patient::with('user')->findOrFail($id);
+    return view('admin.patients.edit', compact('patient'));
+   }
+
+
+    /**
+     * Store a newly created patient in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|string|unique:patients',
+            'name' => 'required|string|max:255',
+            'gender' => 'required|in:male,female,other',
+            'age' => 'required|integer',
+            'phone' => 'required|string|max:15',
+            'email' => 'required|string|email|max:255|unique:users',
+            'department' => 'required|string',
+            'year_of_study' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $patient = Patient::create([
+            'patient_id' => $request->patient_id,
+            'name' => $request->name,
+            'gender' => $request->gender,
+            'age' => $request->age,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'department' => $request->department,
+            'year_of_study' => $request->year_of_study,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'message' => 'Patient created successfully',
+            'patient' => $patient->load('user'),
+        ], 201);
+    }
+
+    /**
+     * Display the specified patient.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($patient_id)
+    {
+        $patient = Patient::find($patient_id);
+    
+        if (!$patient) {
+            return redirect()->route('admin.patients.index')->with('error', 'Patient not found.');
+        }
+    
+        return view('admin.patients.show', compact('patient'));
+    }
+
+    public function showPatient($patient_id)
+    {
+        $patient = Patient::with('labRequests')->find($patient_id);
+      
+        return view('staff.patients.show', compact('patient'));
+    }
+    /**
+     * Update the specified patient in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $patient = Patient::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'sometimes|required|string|unique:patients,id,' . $id,
+            'name' => 'sometimes|required|string|max:255',
+            'gender' => 'sometimes|required|in:male,female',
+            'age' => 'sometimes|required|integer',
+            'phone' => 'sometimes|required|string|max:15',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $patient->user_id,
+            'department' => 'sometimes|required|string',
+            'year_of_study' => 'sometimes|required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+
+        $patient->update([
+            'patient_id' => $request->id ?? $patient->id,
+            'name' => $request->name ?? $patient->name,
+            'gender' => $request->gender ?? $patient->gender,
+            'age' => $request->age ?? $patient->age,
+            'phone' => $request->phone ?? $patient->phone,
+            'email' => $request->email ?? $patient->email,
+            'department' => $request->department ?? $patient->department,
+            'year_of_study' => $request->year_of_study ?? $patient->year_of_study,
+        ]);
+        $patients = Patient::all();
+        return view('admin.patients.index', compact('patients'))->with('message', 'Patient updated successfully');
+    }
+
+    /**
+     * Remove the specified patient from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($patient_id)
+    {
+        $patient = Patient::findOrFail($patient_id); // returns a model instance
+        $patient->delete();
+
+        return redirect()->route('admin.patients.index')->with('success', 'Patient deleted successfully.');
+
+    }
+
+    /**
+     * Get the medical history of the specified patient.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function medicalHistory($id)
+    {
+        $patient = Patient::with('user')->findOrFail($id);
+        $user = auth()->user();
+    
+        // Allow access if:
+        // - the user is the patient themselves
+        // - the user is a Nurse or Health Officer
+        if (
+            $user->id !== $patient->user_id &&
+            !$user->isNurse() &&
+            !$user->isHealthOfficer()
+        ) {
+            abort(403, 'Unauthorized access to patient medical history.');
+        }
+    
+        // Load the patient's medical records and related data
+        $medicalHistory = $patient->medicalRecords()
+            ->with(['prescriptions.items.medication']) // No physician, so just prescriptions
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        return view('patients.index', [
+            'patient' => $patient,
+            'medicalHistory' => $medicalHistory,
+        ]);
+    }
+    
+
+    /**
+     * Get the appointment history of the specified patient.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function appointmentHistory($id)
+    {
+        $patient = Patient::with('user')->findOrFail($id);
+        $user = auth()->user();
+    
+        // Authorization: only the patient themselves, nurses, or health officers can access
+        if (
+            $user->id !== $patient->user_id &&
+            !$user->isNurse() &&
+            !$user->isHealthOfficer()
+        ) {
+            abort(403, 'Unauthorized access to patient appointment history.');
+        }
+    
+        // Get the appointment history with relevant relations (e.g., assigned staff)
+        $appointmentHistory = $patient->appointments()
+            ->with(['assignedBy']) // replace 'physician.user' with a valid relation or remove
+            ->orderBy('appointment_date', 'desc')
+            ->get();
+      
+        return view('staff.patients.show', [
+            'patient' => $patient,
+            'appointmentHistory' => $appointmentHistory,
+        ]);
+    }
+    
+   public function search(Request $request)
+ {    
+Log::info('Search request received', ['request' => $request->all()]);
+    $patientId = $request->input('patient_id');
+   
+    $patient = Patient::where('patient_id', $patientId)->first();
+    
+
+    return view('staff.patients.show', compact('patient'));
+ }
+}
+

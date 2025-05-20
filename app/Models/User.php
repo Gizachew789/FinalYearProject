@@ -114,4 +114,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Admin::class);
     }
+    public function nurse()
+    {
+        return $this->hasOne(Nurse::class);
+    }
+    public function results()
+{
+    return $this->hasMany(Result::class, 'tested_by');
+}
+
 }

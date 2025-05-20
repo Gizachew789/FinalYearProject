@@ -4,13 +4,13 @@
     <div class="container">
         <h1>Create New Result</h1>
         
-        <form action="{{ route('results.store') }}" method="POST">
+        <form action="{{ route('lab.results.store') }}" method="POST">
             @csrf
             <div class="form-group">
                 <label for="patient_id">Patient</label>
                 <select name="patient_id" id="patient_id" class="form-control">
                     @foreach ($patients as $patient)
-                        <option value="{{ $patient->id }}">{{ $patient->name }}</option>
+                        <option value="{{ $patient->patient_id }}">{{ $patient->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -58,7 +58,7 @@
             </div>
 
             <button type="submit" class="btn btn-success">Create Result</button>
-            <a href="{{ route('results.index') }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ route('lab.results.index') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 @endsection

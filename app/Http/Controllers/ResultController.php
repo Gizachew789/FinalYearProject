@@ -6,28 +6,44 @@ use App\Models\Result;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ResultController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('permission:labtest-result-view', ['only' => ['labtest-result', 'view']]);
     }
 
-    // Display a list of all results
-    public function index()
-    {
-        $results = Result::with('patient', 'tested_by_user') // eager load patient and user
-            ->orderBy('result_date', 'desc')
-            ->get();
+   public function index($patient_id)
+{
+    $patient = Patient::with('results.tested_by_user')
+                ->where('patient_id', $patient_id)
+                ->firstOrFail(); // find by patient_id column
 
-        return view('results.index', compact('results'));
-    }
+    $results = $patient->results;
+
+    return view('lab-technician.results.index', compact('patient', 'results'));
+}
+
+
+        
+   public function search(Request $request)
+ {    
+Log::info('Search request received', ['request' => $request->all()]);
+    $patientId = $request->input('patient_id');
+   
+    $result = Result::where('patient_id', $patientId)->first();
+    
+
+    return view('lab-technician.results.show', compact('result'));
+ }
 
     // Show the details of a single result
     public function show(Result $result)
     {
-        return view('results.show', compact('result'));
+        return redirect()->route('lab.results.show', compact('result'));
     }
 
     // Show the form to create a new result
@@ -35,14 +51,14 @@ class ResultController extends Controller
     {
         $patients = Patient::all();
         $users = User::all();
-        return view('results.create', compact('patients', 'users'));
+        return redirect()->route('lab.results.create', compact('patients', 'users'));
     }
 
     // Store a new result in the database
     public function store(Request $request)
     {
         $request->validate([
-            'patient_id' => 'required|exists:patients,id',
+            'patient_id' => 'required|exists:patients,patient_id',
             'disease_type' => 'required|string|max:255',
             'sample_type' => 'required|in:Blood,Saliva,Tissue,Waste',
             'result' => 'required|in:Positive,Negative',
@@ -60,7 +76,7 @@ class ResultController extends Controller
             'result_date' => $request->input('result_date'),
         ]);
 
-        return redirect()->route('results.index')->with('success', 'Test result created successfully.');
+        return redirect()->route('lab.results.index')->with('success', 'Test result created successfully.');
     }
 
     // Show the form to edit an existing result
@@ -68,7 +84,7 @@ class ResultController extends Controller
     {
         $patients = Patient::all();
 
-        return view('results.edit', compact('result', 'patients'));
+        return redirect()->route('lab.results.edit', compact('result', 'patients'));
     }
 
     // Update an existing result in the database
@@ -92,7 +108,7 @@ class ResultController extends Controller
             'result_date' => $request->result_date,
         ]);
 
-        return redirect()->route('results.index')->with('success', 'Test result updated successfully.');
+        return redirect()->route('lab.results.index')->with('success', 'Test result updated successfully.');
     }
 
     // Delete a result from the database
@@ -100,6 +116,6 @@ class ResultController extends Controller
     {
         $result->delete();
 
-        return redirect()->route('results.index')->with('success', 'Test result deleted successfully.');
+        return redirect()->route('lab.results.index')->with('success', 'Test result deleted successfully.');
     }
 }

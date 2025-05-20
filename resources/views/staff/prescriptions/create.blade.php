@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <form action="{{ route('staff.prescriptions.store', $patient->id) }}" method="POST">
+    <form action="{{ route('staff.prescriptions.store', ['patient_id' => $patient->patient_id]) }}" method="POST">
         @csrf
 
         <select name="medication_id" id="medication_id" class="form-control" required>

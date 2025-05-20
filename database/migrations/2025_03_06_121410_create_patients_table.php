@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email')->unique(); // ensure email is unique
             $table->string('department')->nullable();
             $table->string('year_of_study')->nullable();
-            $table->string('blood_group')->nullable();
+           // $table->string('blood_group')->nullable();
             $table->timestamps();
         });
     }
