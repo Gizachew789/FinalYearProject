@@ -7,15 +7,11 @@ use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ResultController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:labtest-result-view', ['only' => ['labtest-result', 'view']]);
-    }
-
+    
    public function index($patient_id)
 {
     $patient = Patient::with('results.tested_by_user')
@@ -24,20 +20,26 @@ class ResultController extends Controller
 
     $results = $patient->results;
 
-    return view('lab-technician.results.index', compact('patient', 'results'));
+    return view('staff.lab-results.index', compact('patient', 'results'));
 }
 
-
+public function showResultsModal()
+{
+    $results = Result::with(['patient', 'testedBy'])->latest()->get();
+    return view('lab_technician.lab_requests.index', compact('results'));
+}
         
    public function search(Request $request)
  {    
-Log::info('Search request received', ['request' => $request->all()]);
-    $patientId = $request->input('patient_id');
-   
-    $result = Result::where('patient_id', $patientId)->first();
-    
+     Log::info('Search request received', ['request' => $request->all()]);
+     $patientId = $request->input('query');
+      $patient = Patient::with('results.tested_by_user')
+                ->where('patient_id', $patientId)
+                ->firstOrFail(); 
+     $result = Result::where('patient_id', $patientId)->first();
+     
 
-    return view('lab-technician.results.show', compact('result'));
+    return view('lab-technician.results.show', compact('result','patient'));
  }
 
     // Show the details of a single result
@@ -57,26 +59,29 @@ Log::info('Search request received', ['request' => $request->all()]);
     // Store a new result in the database
     public function store(Request $request)
     {
+
         $request->validate([
             'patient_id' => 'required|exists:patients,patient_id',
             'disease_type' => 'required|string|max:255',
-            'sample_type' => 'required|in:Blood,Saliva,Tissue,Waste',
-            'result' => 'required|in:Positive,Negative',
+            'sample_type' => 'required|string|max:255',
+            'result' => 'required|in:positive,negative',
             'Recommendation' => 'nullable|string|max:255',
-            'result_date' => 'required|date',
+            
         ]);
+$user=Auth::id();
 
-        Result::create([
+     Result::create([
             'patient_id' => $request->input('patient_id'),
-            'tested_by' => auth()->id(), // automatically assign current lab technician
+            'tested_by' => $user, 
             'disease_type' => $request->input('disease_type'),
             'sample_type' => $request->input('sample_type'),
             'result' => $request->input('result'),
             'Recommendation' => $request->input('Recommendation'),
-            'result_date' => $request->input('result_date'),
+             'result_date' => now(),
         ]);
 
-        return redirect()->route('lab.results.index')->with('success', 'Test result created successfully.');
+
+return redirect()->back()->with('success', 'Test result created successfully.');
     }
 
     // Show the form to edit an existing result

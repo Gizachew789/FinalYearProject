@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->string('patient_id');
+            $table->foreign('patient_id')->references("patient_id")->on('patients')->onDelete('cascade');
             $table->unsignedBigInteger('created_by');
             $table->foreignId('recorded_by')->constrained('users')->onDelete('cascade');
             $table->text('diagnosis')->notNullable(); //Description of the patient's diagnosis

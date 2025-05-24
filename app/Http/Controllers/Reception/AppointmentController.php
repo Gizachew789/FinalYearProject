@@ -7,6 +7,8 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
@@ -49,17 +51,19 @@ class AppointmentController extends Controller
     // Store a new appointment
     public function store(Request $request)
     {
+
         // Validate the incoming request data
         $request->validate([
             'patient_id' => 'required|exists:patients,patient_id',
             'appointment_date' => 'required|date',
             'appointment_time' => 'required|date_format:H:i',
             'reason' => 'nullable|string|max:255',
-            'reception_id' => 'required|exists:users,id',
+         
         ]);
         $createdBy = Auth::id(); // Get the ID of the authenticated user
+
         // Create a new appointment
-        Appointment::create([
+      Appointment::create([
             'patient_id' => $request->input('patient_id'),
             'appointment_date' => $request->input('appointment_date'),
             'appointment_time' => $request->input('appointment_time'),

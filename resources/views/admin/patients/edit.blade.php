@@ -4,13 +4,13 @@
 <div class="container">
     <h2>Edit Patient</h2>
 
-    <form action="{{ route('admin.patients.update', $patient->id) }}" method="POST">
+    <form action="{{ route('admin.patients.update',$patient-> patient_id) }}" method="POST">
         @csrf
         @method('PUT')
 
         <div class="mb-3">
             <label for="student_id" class="form-label">Student ID</label>
-            <input type="text" name="student_id" id="student_id" class="form-control" value="{{ old('student_id', $patient->student_id) }}" required>
+            <input type="text" name="patient_id" id="patient_id" class="form-control" value="{{ old('patient_id', $patient->patient_id) }}" required>
         </div>
 
         <div class="mb-3">
@@ -52,7 +52,6 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Update Patient</button>
-        <a href="{{ route('admin.patients.index') }}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 @endsection

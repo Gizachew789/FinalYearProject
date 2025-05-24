@@ -13,6 +13,12 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+// public function UserModal()
+//     {
+//     $users = User::select('id', 'name', 'email', 'role', 'status', 'created_at')->get();
+//     return view('admin.dashboard', compact('users'));
+//    } 
+
     public function show(User $user)
     {
         return view('admin.users.show', compact('user'));

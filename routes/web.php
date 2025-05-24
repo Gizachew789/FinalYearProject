@@ -35,6 +35,9 @@ Route::get('/', function () {
 });
 
 Route::resource('roles', RoleController::class);
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -62,9 +65,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Admin routes
 Route::prefix('admin')->name('admin.')->middleware(['auth:admin', 'role:Admin'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+   Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
 
     // Staff registration
     Route::get('/register-user', [UserRegistrationController::class, 'create'])->name('register.user');
@@ -105,11 +106,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:admin', 'role:Admin'])
     // Patient management
     Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
     Route::get('/patients/{patient_id}', [PatientController::class, 'show'])->name('patients.show');
-    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
-    Route::get('/patients/{patient_id}/edit', [PatientController::class, 'edit'])->name('patients.edit');
     Route::put('/patients/{patient_id}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient_id}', [PatientController::class, 'destroy'])->name('patients.destroy');
 });
+Route::get('/admin/patients/{patient_id}/edit', [PatientController::class, 'edit'])->name('admin.patients.edit');
+    Route::get('/patients', [PatientController::class, 'listPatients'])->name('admin.patients.index');
 
 // Reception routes
 Route::prefix('reception')->name('reception.')->middleware(['auth:reception', 'role:Reception'])->group(function () {
@@ -171,6 +172,9 @@ Route::get('/appointments/search', [AppointmentController::class, 'search'])->na
 Route::get('/patients/search', [PatientController::class, 'search'])->name('staff.patients.search');
 Route::get('/patients/{patient_id}', [PatientController::class, 'showPatient'])->name('staff.patients.show');
 Route::get('/lab_results/search', [ResultController::class, 'search'])->name('lab-results.search');
+// Route::get('/admin/patients/list', [PatientController::class, 'listPatients'])->name('admin.patients.list');
+ //Route::get('/admin/users', [UserController::class, 'UserModal'])->name('admin.users');
+
 
 // Result routes
 Route::resource('results', ResultController::class);
@@ -218,3 +222,11 @@ Route::prefix('patient')->middleware(['auth:patient'])->name('patient.')->group(
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/results/search', [ResultController::class, 'search'])->name('results.search');
+
+
+
+
+
+    //Route::get('admin/patient/fetch', [DashboardController::class, 'fetchPatients'])->name('admin.patient.fetch');
+    Route::get('admin/staff/fetch', [DashboardController::class, 'fetchUsers'])->name('admin.staff.fetch');

@@ -43,55 +43,59 @@ class MedicalRecordController extends Controller
         $patients = Patient::with('user')->get();
         $appointments = Appointment::all();
 
-        return view('medical_records.create', compact('patients', 'appointments'));
+        return view('staff.medical_records.create', compact('patients', 'appointments'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'appointment_id' => 'nullable|exists:appointments,id',
-            'diagnosis' => 'nullable|string',
-            'symptoms' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'follow_up_date' => 'nullable|date',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'patient_id' => 'required|exists:patients,patient_id',
+        'lab_results_id' => 'nullable|exists:results,id',
+        'diagnosis' => 'nullable|string',
+        'prescription' => 'nullable|string',
+        'treatment' => 'nullable|string',
+        'follow_up_date' => 'nullable|date',
+        'visit_date' => 'nullable|date',
+        'appointment_id' => 'nullable|exists:appointments,id',
+    ]);
 
-        $user = $request->user();
+    $user = $request->user();
 
-        if (!$user->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
-            abort(403, 'Unauthorized');
-        }
+    if (!$user->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
+        abort(403, 'Unauthorized');
+    }
 
-        $medicalRecord = MedicalRecord::create([
-            'patient_id' => $request->patient_id,
-            'appointment_id' => $request->appointment_id,
-            'created_by' => $user->id,
-            'diagnosis' => $request->diagnosis,
-            'symptoms' => $request->symptoms,
-            'treatment' => $request->treatment,
-            'notes' => $request->notes,
-            'follow_up_date' => $request->follow_up_date,
-        ]);
+    $medicalRecord = MedicalRecord::create([
+        'patient_id' => $request->patient_id,
+        'created_by' => $user->id,
+        'diagnosis' => $request->diagnosis,
+        'treatment' => $request->treatment,
+        'prescription' => $request->prescription,
+        'visit_date' => $request->visit_date ?? now(), // default to current date if not provided
+        'follow_up_date' => $request->follow_up_date,
+        'lab_results_id' => $request->lab_results_id,
+    ]);
 
-        if ($request->appointment_id) {
-            $appointment = Appointment::find($request->appointment_id);
+    if ($request->appointment_id) {
+        $appointment = Appointment::find($request->appointment_id);
+        if ($appointment) {
             $appointment->status = 'completed';
             $appointment->save();
         }
-
-        Notification::create([
-            'user_id' => $medicalRecord->patient->user_id,
-            'title' => 'New Medical Record',
-            'message' => 'A new medical record has been created for you.',
-            'type' => 'system',
-            'related_id' => $medicalRecord->id,
-            'related_type' => MedicalRecord::class,
-        ]);
-
-        return redirect()->route('medical_records.index')->with('success', 'Medical record created successfully.');
     }
+
+    Notification::create([
+        'user_id' => $medicalRecord->patient->user_id,
+        'title' => 'New Medical Record',
+        'message' => 'A new medical record has been created for you.',
+        'type' => 'system',
+        'related_id' => $medicalRecord->id,
+        'related_type' => MedicalRecord::class,
+    ]);
+
+    return redirect()->route('medical_records.index')->with('success', 'Medical record created successfully.');
+}
+
 
     public function show($id)
     {
@@ -125,7 +129,6 @@ class MedicalRecordController extends Controller
 
         $document = Document::create([
             'medical_record_id' => $medicalRecord->id,
-            'uploaded_by' => $user->id,
             'title' => $request->title,
             'file_path' => $path,
             'file_type' => $request->file('file')->getMimeType(),

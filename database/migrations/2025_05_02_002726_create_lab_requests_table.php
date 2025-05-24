@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('lab_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
+            $table->string('patient_id'); 
+            $table->foreign('patient_id')->references('patient_id')->on('patients')->onDelete('cascade');
             $table->unsignedBigInteger('requested_by'); // User who requested
             $table->string('test_name');
             $table->text('notes')->nullable();
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
     
             // Foreign keys
-            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
+            
             $table->foreign('requested_by')->references('id')->on('users')->onDelete('cascade');
         });
     }

@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('lab_reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->references('id')->on('patients')->onDelete('cascade');
-            $table->foreignId('lab_technician_id')->references('id')->on('patients')->onDelete('cascade');
+            $table->string('patient_id');
+            $table->foreign('patient_id')->references('patient_id')->on('patients')->onDelete('cascade');
+            $table->foreignId('lab_technician_id')->references('id')->on('users')->onDelete('cascade');
             $table->enum('test_type',['Blood', 'Waste', 'Tissue'])->defaul('Blood');
             $table->text('result')->notNullable();
             $table->text('test_description')->Nullable();
