@@ -56,10 +56,13 @@ class PatientController extends Controller
 
 
 
-    public function edit(Patient $patient)
-    {
-        return view('admin.patients.edit', compact('patient'));
-    }
+ public function edit($patient_id)
+{
+    $patient = Patient::where('patient_id', $patient_id)->firstOrFail();
+
+    return view('admin.patients.edit', compact('patient'));
+}
+
 
     public function update(Request $request, Patient $patient)
     {
@@ -68,11 +71,14 @@ class PatientController extends Controller
         return redirect()->route('admin.patients.show', $patient)->with('success', 'Patient updated successfully');
     }
 
-    public function destroy(Patient $patient)
-    {
-        $patient->delete();
-        return redirect()->route('admin.patients.index')->with('success', 'Patient deleted successfully');
-    }
+  public function destroy($patient_id)
+{
+    $patient = Patient::where('patient_id', $patient_id)->firstOrFail();
+    $patient->delete();
+
+    return redirect()->back()->with('success', 'Patient deleted successfully');
+}
+
 
     public function search(Request $request)
     {
@@ -101,7 +107,7 @@ class PatientController extends Controller
             'prescription' => 'nullable|string|max:1000',
             'visit_date' => 'required|date',
             'follow_up_date' => 'nullable|date|after_or_equal:visit_date',
-            'lab_results_id' => 'nullable|exists:lab_results,id',
+            'results_id' => 'nullable|exists:results,id',
         ]);
 
         try {
@@ -110,10 +116,10 @@ class PatientController extends Controller
                 'created_by' => $user->id,
                 'diagnosis' => $request->diagnosis,
                 'treatment' => $request->treatment,
-                'prescription' => $request->treatment,
+                'prescription' => $request->prescription,
                 'visit_date' => $request->visit_date,
                 'follow_up_date' => $request->follow_up_date,
-                'lab_results_id' => $request->lab_results_id,
+                'results_id' => $request->results_id,
             ]);
 
             Log::info('Medical record created', [
@@ -174,4 +180,18 @@ class PatientController extends Controller
             return back()->withErrors(['error' => 'Failed to upload medical document. Please try again.']);
         }
     }
+
+
+public function listPatients(Request $request)
+{
+            Log::info('Patient show', $request->all());
+
+          $query = Patient::query();
+    if ($request->filled('patient_search')) {
+        $query->where('patient_id', $request->input('patient_search'));
+    }
+    $patients = $query->latest()->paginate(10);
+    
+    return view('admin.dashboard', compact('patients'));
+}
 }

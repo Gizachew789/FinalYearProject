@@ -27,7 +27,8 @@ class UserRegistrationController extends Controller
             'gender' => 'required|in:male,female',
             'phone' => 'nullable|string|max:20',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:Reception,Pharmacist,Lab_Technician,Health_Officer,Nurse',
+            'role' => 'required|exists:roles,name',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         $randomPassword = \Str::random(10);
@@ -38,6 +39,7 @@ class UserRegistrationController extends Controller
             'gender' => $validated['gender'],
             'phone' => $validated['phone'],
             'email' => $validated['email'],
+            'status' => $validated['status'],  
             'password' => bcrypt('12345678'),
         ]);
 

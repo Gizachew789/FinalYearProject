@@ -18,7 +18,9 @@
                 <p><strong>Result Date:</strong> {{ $result->result_date }}</p>
             </div>
         </div>
-
-        <a href="{{ route('lab.results.index') }}" class="btn btn-primary mt-3">Back to Results</a>
+  <a href="{{ route('lab.results.index', ['patient_id'=> $patient->patient_id]) }}" 
+                       class="btn btn-info btn-lg px-4">
+                        <i class="fas fa-eye mr-2"></i> Back to Results
+                    </a>
     </div>
 @endsection

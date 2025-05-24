@@ -37,7 +37,6 @@ class Patient extends Authenticatable
      * The attributes that should be hidden for arrays.
      */
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 
@@ -48,6 +47,15 @@ class Patient extends Authenticatable
         'email' => 'string',
     ];
 
+
+        public function setPasswordAttribute($value)
+    {
+        if (!empty($value) && !\Illuminate\Support\Str::startsWith($value, '$2y$')) {
+            $this->attributes['password'] = bcrypt($value);
+        } else {
+            $this->attributes['password'] = $value;
+        }
+    }
     /**
      * Relationships
      */

@@ -57,21 +57,21 @@ class LabRequestController extends Controller
             'notes' => $request->notes,
             'status' => 'pending',
         ]);
-    
+            return view('staff.patients.show', compact('patient'))->with('success', 'Lab request submitted.');
+
         // Redirect to the patient's page with a success message
-        return redirect()->route('staff.patients.show', ['patient_id' => $patient_id])->with('success', 'Lab request submitted.');
     }
     
 
     public function index()
     {
         // Only allow specific roles to view lab requests
-        if (!Auth::user()->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
+        if (!Auth::user()->hasAnyRole([ 'Lab_Technician'])) {
             abort(403, 'Unauthorized');
         }
 
-        $labRequests = LabRequest::latest()->paginate(10);
-        return view('staff.lab.index', compact('labRequests'));
+        $labRequests = LabRequest::with(['patient', 'requestedBy'])->get();;
+        return view('staff.lab-requests.index', compact('labRequests'));
     }
 
     public function show($id)

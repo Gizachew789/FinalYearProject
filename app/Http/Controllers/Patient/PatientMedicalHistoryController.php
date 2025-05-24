@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use App\Models\Result;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 

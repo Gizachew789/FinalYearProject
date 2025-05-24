@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('prescriber_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
+            $table->string('patient_id');
+            $table->foreign('patient_id')->references("patient_id")->on('patients')->onDelete('cascade');
             $table->foreignId('medication_id')->constrained('medications')->onDelete('cascade');
             $table->string('dosage')->notNullable();
             $table->string('frequency')->notNullable();

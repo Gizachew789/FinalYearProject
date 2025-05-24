@@ -7,9 +7,9 @@
     <div class="card mb-4">
         <div class="card-header">Basic Information</div>
         <div class="card-body">
-            <p><strong>ID:</strong> {{ $patients->patient_id ?? 'N/A' }}</p>
-            <p><strong>Name:</strong> {{ $patients->name ? $patients->name : 'N/A'}}</p>
-            <p><strong>Gender:</strong> {{ $patients->gender ?? 'N/A' }}</p>
+            <p><strong>ID:</strong> {{ $patient->patient_id ?? 'N/A' }}</p>
+            <p><strong>Name:</strong> {{ $patient->name ? $patient->name : 'N/A'}}</p>
+            <p><strong>Gender:</strong> {{ $patient->gender ?? 'N/A' }}</p>
 
         </div>
     </div>
@@ -33,7 +33,7 @@
             @endif
             <!-- Form to Record New Medical History -->
             <h5 class="mt-4">Record New Medical History</h5>
-            <form action="{{ route('staff.medical_records.store', $patients->patient_id) }}" method="POST" class="mb-4">
+            <form action="{{ route('staff.medical_records.store', $patient->patient_id) }}" method="POST" class="mb-4">
                 @csrf
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -88,7 +88,7 @@
 
             <!-- Form to Upload Medical Document -->
             <h5 class="mt-4">Upload Medical Document</h5>
-            <form action="{{ route('staff.medical_documents.upload', $patients->patient_id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
+            <form action="{{ route('staff.medical_documents.upload', $patient->patient_id) }}" method="POST" enctype="multipart/form-data" class="mb-4">
                 @csrf
                 <div class="mb-3">
                     <label for="document" class="form-label">Document (PDF, JPG, PNG, max 5MB)</label>
@@ -102,7 +102,7 @@
 
             <!-- Medical Records Table -->
             <h5 class="mt-4">Medical Records</h5>
-            @if($patients->medicalHistory->isEmpty())
+            @if($patient->medicalHistory->isEmpty())
                 <p>No medical records found.</p>
             @else
                 <table class="table table-bordered mb-4">
@@ -117,7 +117,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($patients->medicalHistory as $record)
+                        @foreach($patient->medicalHistory as $record)
                             <tr>
                                 <td>{{ $record->visit_date ? $record->visit_date->format('Y-m-d') : 'N/A' }}</td>
                                 <td>{{ $record->diagnosis ?? 'N/A' }}</td>
@@ -133,7 +133,7 @@
 
             <!-- Medical Documents Table -->
             <h5 class="mt-4">Medical Documents</h5>
-            @if($patients->medicalDocuments->isEmpty())
+            @if($patient->medicalDocuments->isEmpty())
                 <p>No medical documents found.</p>
             @else
                 <table class="table table-bordered">
@@ -144,7 +144,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($patients->medicalDocuments as $document)
+                        @foreach($patient->medicalDocuments as $document)
                             <tr>
                                 <td>{{ ucfirst($document->file_type) }}</td>
                                 <td>{{ $document->created_at->format('Y-m-d H:i') }}</td>

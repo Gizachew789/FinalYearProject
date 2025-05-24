@@ -1784,3 +1784,114 @@ Log::info('Search request received', ['request' => $request->all()]);
  }
 }
 
+
+
+////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+//////////////////////////////////////////////////
+
+
+
+
+
+////////////////////////////
+<div class="modal fade" id="userManagementModal" tabindex="-1" aria-labelledby="userManagementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="userManagementModalLabel"><i class="fas fa-users me-2"></i>User Management</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Filter and Add User -->
+                <div class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" id="userSearch" class="form-control" placeholder="Search users...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select id="userRoleFilter" class="form-select">
+                                <option value="">All Roles</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Nurse">Nurse</option>
+                                <option value="Reception">Receptionist</option>
+                                <option value="Lab_Technician">Lab Technician</option>
+                                <option value="Pharmacist">Pharmacist</option>
+                                <option value="Health_Officer">Health Officer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerUserModal">
+                                <i class="fas fa-user-plus me-1"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($users as $user)
+                                <tr>
+                                    <td>{{ $user->id }}</td>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->email }}</td>
+                                    <td><span class="badge bg-primary">{{ $user->role }}</span></td>
+                                    <td>
+                                        <span class="badge bg-{{ $user->status == 'Active' ? 'success' : 'secondary' }}">
+                                            {{ $user->status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $user->created_at->format('Y-m-d') }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-outline-primary">
+                                                <i class="fas fa-edit"></i> edit
+                                            </a>
+                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure?')">
+                                                    <i class="fas fa-trash"></i> delete
+                                                </button>
+                                            </form>
+                                            <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-outline-info">
+                                                <i class="fas fa-eye"></i> view
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center">No users found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" disabled>Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+

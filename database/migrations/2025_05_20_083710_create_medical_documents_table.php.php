@@ -10,11 +10,12 @@ class CreateMedicalDocumentsTable extends Migration
     {
         Schema::create('medical_documents', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
+           
             $table->string('file_path');
             $table->enum('file_type', ['pdf', 'image']);
             $table->timestamps();
 
+            $table->string('patient_id'); 
             $table->foreign('patient_id')->references('patient_id')->on('patients')->onDelete('cascade');
         });
     }

@@ -14,38 +14,40 @@ class InventoryController extends Controller
 {
     /**
      * Display a listing of the medications.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
+        // 1. Get distinct categories for the filter dropdown
+        $categories = Medication::select('category')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category');
+
+        // 2. Build the base query
         $query = Medication::query();
 
-        // Filter by category
-        if ($request->has('category')) {
-            $query->where('category', $request->category);
+        // 3. Apply search filter if provided
+        if ($request->inventory_search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->inventory_search . '%')
+                  ->orWhere('description', 'like', '%' . $request->inventory_search . '%');
+            });
         }
 
-        // Filter by low stock
-        if ($request->has('low_stock') && $request->low_stock === 'true') {
-            $query->whereRaw('current_stock <= reorder_level');
+        // 4. Apply category filter if selected
+        if ($request->inventory_category) {
+            $query->where('category', $request->inventory_category);
         }
 
-        // Search by name
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
+        // 5. Paginate results
+        $medications = $query->latest()->paginate(10);
 
-        $medications = $query->orderBy('name')->paginate(15);
-
-        return view('admin.inventory.index', compact('medications'));
+        // 6. Return to view
+        return view('admin.dashboard', compact('categories', 'medications'));
     }
 
     /**
      * Show the form for creating a new medication.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -54,36 +56,32 @@ class InventoryController extends Controller
 
     /**
      * Store a newly created medication in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
+            'description' => 'nullable|string',
+            'category' => 'required|string',
+            'unit' => 'required|string',
             'current_stock' => 'required|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0',
             'expiry_date' => 'nullable|date',
-            'manufacturer' => 'nullable|string|max:255',
+            'manufacturer' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $medication = Medication::create($request->all());
+        Medication::create($request->all());
 
         return redirect()->route('admin.inventory.index')->with('success', 'Medication added successfully');
     }
 
     /**
      * Display the specified medication.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
@@ -93,9 +91,6 @@ class InventoryController extends Controller
 
     /**
      * Show the form for editing the specified medication.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
@@ -105,10 +100,6 @@ class InventoryController extends Controller
 
     /**
      * Update the specified medication in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -129,29 +120,22 @@ class InventoryController extends Controller
 
         $medication->update($request->all());
 
-        return redirect()->route('inventory.index')->with('success', 'Medication updated successfully');
+        return redirect()->route('admin.inventory.index')->with('success', 'Medication updated successfully');
     }
 
     /**
      * Remove the specified medication from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         $medication = Medication::findOrFail($id);
         $medication->delete();
 
-        return redirect()->route('inventory.index')->with('success', 'Medication deleted successfully');
+        return redirect()->route('admin.inventory.index')->with('success', 'Medication deleted successfully');
     }
 
     /**
      * Update the stock of a medication.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function updateStock(Request $request, $id)
     {
@@ -189,19 +173,17 @@ class InventoryController extends Controller
                 'performed_by' => auth()->id(),
             ]);
 
-            // Check if stock is low and notify admins and pharmacists
+            // Notify if stock is low
             if ($medication->current_stock <= $medication->reorder_level) {
                 $this->notifyLowStock($medication);
             }
         });
 
-        return redirect()->route('inventory.index')->with('success', 'Stock updated successfully');
+        return redirect()->route('admin.inventory.index')->with('success', 'Stock updated successfully');
     }
 
     /**
      * Get low stock medications.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function lowStock()
     {
@@ -214,9 +196,6 @@ class InventoryController extends Controller
 
     /**
      * Notify admins and pharmacists about low stock.
-     *
-     * @param  \App\Models\Medication  $medication
-     * @return void
      */
     private function notifyLowStock(Medication $medication)
     {

@@ -30,7 +30,7 @@ class PatientRegistrationController extends Controller
             'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:patients,email',
             'department' => 'nullable|string|max:255',
-            'year_of_study' => 'nullable|string|max:255',   
+            'year_of_study' => 'nullable|string|max:255', 
         ]);
     
           $patient = Patient::create([
