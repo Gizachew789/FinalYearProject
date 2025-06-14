@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
-            $table->foreignID('tested_by')->constrained('users')->onDelete('cascade');
+            $table->string('patient_id'); 
+            $table->foreign('patient_id')->references('patient_id')->on('patients')->onDelete('cascade');
+            $table->foreignId('tested_by')->constrained('users')->onDelete('cascade');
             $table->string('disease_type');
             $table->enum('sample_type',['Blood', 'Saliva', 'Tissue', 'Waste'])->default('Blood');
             $table->enum('result', ['Positive', 'Negative']);

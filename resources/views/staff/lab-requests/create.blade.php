@@ -13,7 +13,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="notes" class="form-label">Notes (Optional)</label>
+            <label for="notes" class="form-label">Notes</label>
             <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
         </div>
 

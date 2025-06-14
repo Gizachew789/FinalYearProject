@@ -16,25 +16,21 @@ class PatientAppointmentController extends Controller
      * Show the form for creating a new appointment.
      */
 
-     public function index()
-     {
-         // Get all appointments for all patients
-         $appointments = Appointment::with('patient')->get();
-     
-         $upcomingAppointments = $appointments->where('status', 'scheduled');
-         $pendingAppointments = $appointments->where('status', 'pending');
-         $completedAppointments = $appointments->where('status', 'completed');
-     
-         // Each patient sees their own medical records only
-         $medicalRecords = MedicalRecord::where('patient_id', auth()->user()->patient_id)->latest()->get();
-     
-         return view('patient.dashboard', compact(
-             'upcomingAppointments',
-             'pendingAppointments',
-             'completedAppointments',
-             'medicalRecords'
-         ));
-     }
+   public function index(Request $request)
+{
+    $query = Appointment::with(['patient', 'creator']); // Assuming you have a 'creator' relationship
+
+    if ($request->filled('appointment_status')) {
+        $query->where('status', $request->appointment_status);
+    }
+
+    $appointments = $query->latest()->get();
+
+    return view('patient.dashboard', compact('appointments'));
+}
+
+
+
 
     public function create()
     {
@@ -44,26 +40,29 @@ class PatientAppointmentController extends Controller
     /**
      * Store a new appointment for the authenticated patient.
      */
-    public function store(Request $request)
- {
+   public function store(Request $request)
+{
     $validated = $request->validate([
         'date'   => ['required', 'date', 'after_or_equal:today'],
         'time'   => ['required'],
         'reason' => ['required', 'string', 'max:1000'],
     ]);
 
+    $user = Auth::user();
 
-    // This part will not be reached until dd() is removed
     Appointment::create([
-        'patient_id'        => Auth::id(),
-        'created_by'        => Auth::user()->patient_id,
+        'patient_id'        => $user->patient_id,
         'appointment_date'  => $validated['date'],
         'appointment_time'  => $validated['time'],
         'reason'            => $validated['reason'],
-        'status'            => 'pending',  // Set default status
+        'status'            => 'pending',
+        // 'created_by' => removed
     ]);
+
     return redirect()->route('patient.dashboard')->with('success', 'Appointment Booked Successfully!!!');
- }
+}
+
+
 
  public function cancel(Appointment $appointment)
 {
@@ -84,7 +83,7 @@ class PatientAppointmentController extends Controller
 
   
 
-  public function dashboard()
+  /* public function dashboard()
   {
       // Show all appointments (not just the ones booked by this user)
       $upcomingAppointments = Appointment::where('status', 'upcoming')
@@ -104,6 +103,46 @@ class PatientAppointmentController extends Controller
           'pendingAppointments',
           'medicalRecords'
       ));
-  }
+  } */
+  
+ /* public function fetchAppointments(Request $request)
+    {
+        Log::info("logo",$request->all());
+        // Start the query with relationships loaded
+        $query = Appointment::with(['patient', 'creator']);
+
+        // Filter by status if provided
+        if ($request->filled('appointment_status')) {
+            $query->where('status', $request->appointment_status);
+        }
+
+        // Paginate results
+        $appointments = $query->latest()->paginate(10);
+
+        // Fetch users for user management (from original controller)
+        $usersQuery = User::with('roles');
+        if ($request->filled('user_search')) {
+            $search = $request->user_search;
+            $usersQuery->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+        if ($request->filled('user_role')) {
+            $role = $request->user_role;
+            $usersQuery->whereHas('roles', function ($q) use ($role) {
+                $q->where('name', $role);
+            });
+        }
+        $users = $usersQuery->latest()->paginate(10);
+
+        // Fetch medications for inventory management (from original controller)
+
+        // Return the view with all data
+        return view('patient.dashboard', compact('appointments'));
+    } */
+
+
+
   
 }

@@ -10,7 +10,7 @@
             <label for="patient_id">Patient</label>
             <select name="patient_id" id="patient_id" class="form-control">
                 @foreach($patients as $patient)
-                <option value="{{ $patient->patient_id }}">{{ $patient->full_name ?? 'Patient '.$patient->patient_id }}</option>
+                <option value="{{ $patient->patient_id }}">{{ $patient->full_name ?? ' '.$patient->patient_id }}</option>
                 @endforeach
             </select>
         </div>
@@ -49,7 +49,7 @@
 
         <div class="form-group">
             <label for="recommendation">Recommendation</label>
-            <input type="text" name="Recommendation" id="recommendation" class="form-control">
+            <input type="text" name="recommendation" id="recommendation" class="form-control">
         </div>
 
         <div class="form-group">

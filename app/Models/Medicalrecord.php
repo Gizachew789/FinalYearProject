@@ -55,7 +55,7 @@ class Medicalrecord extends Model
         return $this->belongsTo(Result::class, 'lab_results_id');
     }
 
-    public function creator()
+    public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
     }

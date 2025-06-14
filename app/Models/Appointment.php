@@ -14,14 +14,13 @@ class Appointment extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'patient_id',
-        'created_by',
-        'appointment_date',
-        'appointment_time',
-        'reason',
-        'status',
-    ];
+        protected $fillable = [
+            'patient_id',
+            'appointment_date',
+            'appointment_time',
+            'reason',
+            'status',
+        ];
 
     /**
      * The attributes that should be cast.

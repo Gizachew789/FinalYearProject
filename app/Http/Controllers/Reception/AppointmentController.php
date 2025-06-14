@@ -7,6 +7,9 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
@@ -47,30 +50,30 @@ class AppointmentController extends Controller
     }
 
     // Store a new appointment
-    public function store(Request $request)
-    {
-        // Validate the incoming request data
-        $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required|date_format:H:i',
-            'reason' => 'nullable|string|max:255',
-            'reception_id' => 'required|exists:users,id',
-        ]);
-        $createdBy = Auth::id(); // Get the ID of the authenticated user
-        // Create a new appointment
-        Appointment::create([
-            'patient_id' => $request->input('patient_id'),
-            'appointment_date' => $request->input('appointment_date'),
-            'appointment_time' => $request->input('appointment_time'),
-            'reason' => $request->input('reason'),
-            'reception_id' => $request->input('reception_id'),
-            'created_by' => $createdBy,
-        ]);
+   public function store(Request $request)
+{
+    // Validate the incoming request data
+    $request->validate([
+        'patient_id' => 'required|exists:patients,patient_id',
+        'appointment_date' => 'required|date',
+        'appointment_time' => 'required|date_format:H:i',
+        'reason' => 'nullable|string|max:255',
+    ]);
 
-        // Redirect to a specific page (e.g., appointment index page)
-        return redirect()->route('reception.appointments.index')->with('success', 'Appointment booked successfully.');
-    } 
+    // Create a new appointment
+    Appointment::create([
+        'patient_id' => $request->input('patient_id'),
+        'appointment_date' => $request->input('appointment_date'),
+        'appointment_time' => $request->input('appointment_time'),
+        'reason' => $request->input('reason'),
+        'reception_id' => $request->input('reception_id'), // keep this if you're using it
+        // 'created_by' => removed
+    ]);
+
+    // Redirect to a specific page (e.g., appointment index page)
+    return redirect()->route('reception.appointments.index')->with('success', 'Appointment booked successfully.');
+}
+
 
     // Optional: View a single appointment
     public function show(Appointment $appointment)
@@ -101,15 +104,18 @@ class AppointmentController extends Controller
     }
     public function accept($patientId)
     {
-        $appointment = Appointment::where('patient_id', $patientId)->first();
+        $appointments = Appointment::where('patient_id', $patientId)->get();
     
-        if (!$appointment) {
+        if ($appointments->isEmpty()) {
             return redirect()->route('staff.dashboard')->with('error', 'Appointment not found.');
         }
     
         // Complete the appointment
+        foreach ($appointments as $appointment) {
+
         $appointment->status = 'completed';
         $appointment->save();
+        }
     
         return view('staff.appointments.accept', compact('appointment'));
     }
@@ -140,6 +146,61 @@ public function showappointment(){
     return view('staff.appointments.show', compact('appointments')); // or whichever view contains your modal
  }
 
+ public function showAppointments()
+{
+    $appointments = Appointment::whereDate('date', '>=', Carbon::today())
+        ->orderBy('date')
+        ->orderBy('time')
+        ->get();
+
+    return view('reception.dashboard', compact('appointments'));
+}
+  public function fetchAppointments(Request $request)
+    {
+        Log::info("logo",$request->all());
+        // Start the query with relationships loaded
+        $query = Appointment::with(['patient', 'creator']);
+
+        // Filter by status if provided
+        if ($request->filled('appointment_status')) {
+            $query->where('status', $request->appointment_status);
+        }
+
+        // Paginate results
+        $appointments = $query->latest()->paginate(10);
+
+        // Fetch users for user management (from original controller)
+        $usersQuery = User::with('roles');
+        if ($request->filled('user_search')) {
+            $search = $request->user_search;
+            $usersQuery->where(function ($q) use ($search) {
+                $q->where('id', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+        if ($request->filled('user_role')) {
+            $role = $request->user_role;
+            $usersQuery->whereHas('roles', function ($q) use ($role) {
+                $q->where('name', $role);
+            });
+        }
+        $users = $usersQuery->latest()->paginate(10);
+
+        // Fetch medications for inventory management (from original controller)
+
+        // Return the view with all data
+        return view('reception.dashboard', compact('appointments'));
+    }
+    
+        public function dashboard()
+    {
+        $appointments = Appointment::with(['patient','reception','creator'])
+            ->orderBy('appointment_date', 'asc')
+            ->take(10) 
+            ->get();
+
+        return view('reception.dashboard', compact('appointments'));
+    }
  }
 
 

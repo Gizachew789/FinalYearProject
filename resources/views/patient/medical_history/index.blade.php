@@ -10,7 +10,7 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
 
-    @if($medicalHistory->isEmpty())
+    @if($medicalRecords->isEmpty())
         <div class="alert alert-info">No medical history records found.</div>
     @else
         <div class="table-responsive">
@@ -20,17 +20,15 @@
                         <th>Date</th>
                         <th>Diagnosis</th>
                         <th>Prescription</th>
-                        <th>Doctor</th>
                         <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($medicalHistory as $record)
+                    @foreach($medicalRecords as $record)
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($record->created_at)->format('Y-m-d') }}</td>
                             <td>{{ $record->diagnosis }}</td>
                             <td>{{ $record->prescription }}</td>
-                            <td>{{ $record->doctor->name ?? 'N/A' }}</td>
                             <td>{{ $record->notes }}</td>
                         </tr>
                     @endforeach

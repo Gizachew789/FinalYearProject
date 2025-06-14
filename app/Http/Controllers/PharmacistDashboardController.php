@@ -5,66 +5,57 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Prescription;
-use App\Models\InventoryTransaction;
+use App\Models\Medication;
 use Illuminate\Support\Facades\DB;
 
 class PharmacistDashboardController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $prescriptions = Prescription::with(['patient.user', 'medications'])
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get();
-    
-        // Get current inventory status per medication
-        $inventory = \App\Models\Medication::with(['inventoryTransactions' => function ($query) {
-            $query->select('medication_id', 'transaction_type', DB::raw('SUM(quantity) as total'))
-                  ->groupBy('medication_id', 'transaction_type');
-        }])->get()->map(function ($medication) {
-            $in = $medication->inventoryTransactions->where('transaction_type', 'in')->sum('total');
-            $out = $medication->inventoryTransactions->where('transaction_type', 'out')->sum('total');
-            $medication->current_quantity = $in - $out;
-            return $medication;
-        });
-    
-        return view('pharmacist.dashboard', compact('prescriptions', 'inventory'));
+        
+        $prescriptions = Prescription::with(['patient', 'prescriber', 'medication'])->latest()->get();
+        $medicationByMedicationId = Medication::all()->keyBy('medication_id');
+
+        return view('pharmacist.dashboard', compact('prescriptions'));
     }
-    
 
-    public function dispense(Request $request, $prescriptionId)
+    public function confirm($id)
     {
-        $request->validate([
-            'medication_ids' => 'required|array',
-            'quantities' => 'required|array',
-        ]);
+        $prescription = Prescription::findOrFail($id);
+        $medication = Medication::where('id', $prescription->medication_id)->first();
 
-        DB::beginTransaction();
+        $requiredQuantity = $prescription->dosage ?? 1; // default to 1 if dosage not set
+          /* dd($requiredQuantity, $medication->quantity); */
+       if ($medication && $medication->current_stock >= $requiredQuantity) {
+        $medication->current_stock -= $requiredQuantity;
+            $medication->save();
 
-        try {
-            foreach ($request->medication_ids as $index => $medicationId) {
-                $quantityToReduce = $request->quantities[$index];
-
-                $inventoryItem = InventoryTransaction::where('medication_id', $medicationId)->first();
-                if (!$inventoryItem || $inventoryItem->quantity < $quantityToReduce) {
-                    throw new \Exception('Insufficient inventory for medication ID: ' . $medicationId);
-                }
-
-                $inventoryItem->decrement('quantity', $quantityToReduce);
-            }
-
-            // Mark prescription as confirmed
-            $prescription = Prescription::findOrFail($prescriptionId);
             $prescription->status = 'confirmed';
-            $prescription->confirmed_by = auth()->id();
             $prescription->save();
-            
-            DB::commit();
 
-            return redirect()->back()->with('success', 'Prescription dispensed and inventory updated.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('success', 'Prescription confirmed and medication dispensed.');
         }
+
+        return redirect()->back()->with('error', 'Not enough storage to confirm prescription.');
+    }
+
+    public function reject($id)
+    {
+        $prescription = Prescription::findOrFail($id);
+        $prescription->status = 'rejected';
+        $prescription->save();
+
+        return redirect()->back()->with('success', 'Prescription rejected successfully.');
+    }
+
+    public function show($id)
+    {
+        $prescription = Prescription::with(['patient', 'prescriber', 'medication'])->findOrFail($id);
+        return view('pharmacist.prescriptions.show', compact('prescription'));
+    }
+
+    public function dispense(Request $request, $id)
+    {
+        // You can implement this if you want a dedicated 'dispense' logic
     }
 }

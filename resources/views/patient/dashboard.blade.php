@@ -2,139 +2,115 @@
 
 @section('content')
 <!-- Patient Dashboard Wrapper -->
-<div class="d-flex" id="patient-dashboard-wrapper">
+<div id="patient-dashboard-wrapper" class="d-flex">
     <!-- Sidebar -->
-    <div class="bg-dark text-white" id="sidebar-wrapper" style="min-width: 250px; min-height: calc(100vh - 72px);">
-        <div class="sidebar-heading p-3 border-bottom">
-            <h5 class="m-0">Patient Panel</h5>
+    <div id="sidebar-wrapper" class="bg-dark text-white" style="width: 250px; min-height: 100vh;">
+        <div class="sidebar-heading p-3">
+            <h4 class="text-center">Patient Panel</h4>
         </div>
         <div class="list-group list-group-flush">
-            <a href="{{ route('patient.dashboard') }}" class="list-group-item list-group-item-action bg-dark text-white border-light active">
-                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            <a href="{{ route('patient.dashboard') }}" class="list-group-item list-group-item-action bg-dark text-white active">
+                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
             </a>
-            <a href="{{ url('/') }}" class="list-group-item list-group-item-action bg-dark text-white border-light">
-                <i class="fas fa-home me-2"></i> Home
+            <a href="{{ url('/') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="fas fa-home mr-2"></i> Home
             </a>
-            <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-light" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                <i class="fas fa-cog me-2"></i> Settings
+            <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-toggle="modal" data-target="#settingsModal">
+                <i class="fas fa-cog mr-2"></i> Settings
             </a>
-            <a href="{{ route('logout') }}" class="list-group-item list-group-item-action bg-dark text-white border-light" 
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="fas fa-sign-out-alt me-2"></i> Logout
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
         </div>
     </div>
 
-            <!-- patient Header -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
+    <!-- Page Content -->
+    <div id="page-content-wrapper" class="w-100">
+        <!-- Navbar at the top -->
+       <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
             <div class="container-fluid">
-                <!-- <button class="btn btn-primary" id="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button> -->
                 <div class="ms-auto d-flex align-items-center">
-                    <span class="me-3">Welcome, {{ Auth::user()->name }}</span>
+                    @auth
+                        <span class="me-3 text-muted">Welcome, {{ Auth::user()->name ?? 'Guest' }}</span>
+                    @else
+                        <span class="me-3 text-muted">Welcome, Guest</span>
+                    @endauth
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i>
+                            <i class="fas fa-user-circle me-1"></i> Account
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('profile') }}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ route('settings') }}"><i class="fas fa-cog me-2"></i>Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
+                            @auth
                             <li>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                    @csrf
+                                </form>
                                 <a class="dropdown-item" href="{{ route('logout') }}" 
                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    Logout
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a>
                             </li>
+                            @else
+                            <li><a class="dropdown-item" href="{{ route('login') }}"><i class="fas fa-sign-in-alt me-2"></i>Login</a></li>
+                            @endauth
                         </ul>
                     </div>
                 </div>
             </div>
         </nav>
 
-    <!-- Page Content -->
-    <div id="page-content-wrapper" class="w-100" style="margin-left: 250px;">
-        <!-- Patient Header -->
-        <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4 fixed-top" style="width: calc(100% - 250px); margin-left: 250px; z-index: 900;">
-            <div class="container-fluid">
-                <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-bell me-1"></i>
-                                <span class="badge bg-danger rounded-pill">1</span>
+        <!-- Main Content -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <!-- Dashboard Cards -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0"><i class="fas fa-calendar-plus mr-2"></i>Book an Appointment</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Schedule your next appointment with our healthcare professionals.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ route('patient.appointments.create') }}" class="btn btn-primary btn-block" data-toggle="modal" data-target="#bookAppointmentModal">
+                                Book Appointment
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#">Upcoming appointment reminder</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">View all notifications</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-1"></i> {{ Auth::user()->name }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">Profile</a></li>
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('logout') }}" 
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        Logout
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav> -->
-
-        <!-- Original Dashboard Content with padding for fixed header -->
-        <div class="container mx-auto p-4" style="margin-top: 70px;">
-            <h1 class="text-3xl mb-6 text-center text-gray-10">Patient Dashboard</h1>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {{-- Book Appointment --}}
-                <div class="bg-blue-100 rounded-lg shadow-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold mb-3">Book an Appointment</h3>
-                    <p class="text-gray-700 mb-4">Schedule your next appointment with our healthcare professionals.</p>
-                    <a href="{{ route('patient.appointments.create') }}" data-bs-toggle="modal" data-bs-target="#bookAppointmentModal" 
-                        class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-3 rounded transition">
-                        Book Appointment
-                    </a>
+                        </div>
+                    </div>
                 </div>
                 
-                {{-- Pending Appointments --}}
-                <div class="bg-yellow-100 rounded-lg shadow-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold mb-3">Pending Appointments</h3>
-                    <p class="text-gray-700 mb-4">View and manage your pending appointment requests.</p>
-                    <a href="{{ route('patient.appointments.index') }}" data-bs-toggle="modal" data-bs-target="#pendingAppointmentsModal" 
-                        class="inline-block bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold px-6 py-3 rounded transition">
-                        View Pending Appointments
-                    </a>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0"><i class="fas fa-clock mr-2"></i>Booked Appointments</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">View pending appointments.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <!-- FIXED BUTTON (remove href and point to the correct modal ID) -->
+                               <button type="button" class="btn btn-info btn-block text-white" data-bs-toggle="modal" data-bs-target="#viewAppointmentsModal">
+                                     View Booked Appointments
+                                </button>
+
+                        </div>
+                    </div>
                 </div>
                 
-                {{-- Medical History --}}
-                <div class="bg-green-100 rounded-lg shadow-lg p-6 text-center">
-                    <h3 class="text-xl font-semibold mb-3">Medical History</h3>
-                    <p class="text-gray-700 mb-4">Access your complete medical history and records.</p>
-                    <a href="{{ route('patient.medical_history.index') }}" data-bs-toggle="modal" data-bs-target="#medicalHistoryModal" 
-                        class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-6 py-3 rounded transition">
-                        View Medical History
-                    </a>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0"><i class="fas fa-file-medical mr-2"></i>Medical History</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Access your complete medical history and records.</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ route('patient.medical_history.index') }}" class="btn btn-success btn-block" data-toggle="modal" data-target="#medicalHistoryModal">
+                                View Medical History
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -142,44 +118,46 @@
 </div>
 
 <!-- Book Appointment Modal -->
-<div class="modal fade" id="bookAppointmentModal" tabindex="-1" aria-labelledby="bookAppointmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="bookAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="bookAppointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-blue-600 text-white">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="bookAppointmentModalLabel">Book New Appointment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <form method="POST" action="{{ route('patient.appointments.store') }}">
                     @csrf
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="appointment_date" class="form-label">Appointment Date</label>
-                            <input type="date" name="appointment_date" id="appointment_date" class="form-control @error('appointment_date') is-invalid @enderror" required>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="appointment_date">Appointment Date</label>
+                            <input type="date" class="form-control" name="appointment_date" id="appointment_date" required>
                             @error('appointment_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
                         
-                        <div class="col-md-6">
-                            <label for="appointment_time" class="form-label">Appointment Time</label>
-                            <input type="time" name="appointment_time" id="appointment_time" class="form-control @error('appointment_time') is-invalid @enderror" required>
+                        <div class="form-group col-md-6">
+                            <label for="appointment_time">Appointment Time</label>
+                            <input type="time" class="form-control" name="appointment_time" id="appointment_time" required>
                             @error('appointment_time')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Reason for Appointment</label>
-                        <textarea name="reason" id="reason" rows="3" class="form-control @error('reason') is-invalid @enderror" required></textarea>
+                    <div class="form-group">
+                        <label for="reason">Reason for Appointment</label>
+                        <textarea class="form-control" name="reason" id="reason" rows="3" required></textarea>
                         @error('reason')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Book Appointment</button>
                     </div>
                 </form>
@@ -189,175 +167,249 @@
 </div>
 
 <!-- Pending Appointments Modal -->
-<div class="modal fade" id="pendingAppointmentsModal" tabindex="-1" aria-labelledby="pendingAppointmentsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="viewAppointmentsModal" tabindex="-1" aria-labelledby="viewAppointmentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-yellow-600 text-white">
-                <h5 class="modal-title" id="pendingAppointmentsModalLabel">Pending Appointments</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="viewAppointmentsModalLabel">
+                    <i class="fas fa-calendar-alt me-2"></i>View Appointments
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                @if($pendingAppointments->isEmpty())
-                    <div class="alert alert-info">You have no pending appointments.</div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($pendingAppointments as $appointment)
+                 <div class="modal-body">
+                <div class="mb-4">
+                    <form method="GET" action="{{ route('patient.appointments.index') }}">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <select name="appointment_status" class="form-select">
+                                     <option value="">All Statuses</option>
+                                    <option value="pending" {{ request('appointment_status') == 'pending' ? 'selected' : '' }}>pending</option>
+                                    <option value="upcoming" {{ request('appointment_status') == 'upcoming' ? 'selected' : '' }}>upcoming</option>
+                                    <option value="Completed" {{ request('appointment_status') == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-success" type="submit">Filter</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                               <!--  <th class="text-end">Actions</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(isset($appointments) && $appointments->count() > 0)
+                                @foreach($appointments as $appointment)
                                     <tr>
-                                        <td>{{ $appointment->appointment_date }}</td>
-                                        <td>{{ $appointment->appointment_time }}</td>
-                                        <td>{{ $appointment->reason }}</td>
-                                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                        <td>{{ $appointment->id ?? 'N/A' }}</td>
+                                        <td>{{ $appointment->patient->name ?? 'N/A' }}</td>
+                                        <td>{{ $appointment->appointment_date?->format('Y-m-d') ?? 'N/A' }}</td>
+                                        <td>{{ $appointment->appointment_time ?? 'N/A' }}</td>
+                                        <td>{{ $appointment->reason ?? 'N/A' }}</td>
                                         <td>
-                                            <form method="POST" action="{{ route('patient.appointments.cancel', $appointment->id) }}" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                    Cancel
-                                                </button>
-                                            </form>
+                                            <span class="badge bg-{{ $appointment->status === 'Scheduled' ? 'primary' : ($appointment->status === 'Confirmed' ? 'success' : ($appointment->status === 'Completed' ? 'info' : ($appointment->status === 'Cancelled' ? 'danger' : 'warning'))) }}">
+                                                {{ $appointment->status ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                               
                                         </td>
                                     </tr>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            @else
+                                <tr><td colspan="8" class="text-center">No appointments found</td></tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Medical History Modal -->
-<div class="modal fade" id="medicalHistoryModal" tabindex="-1" aria-labelledby="medicalHistoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="medicalHistoryModal" tabindex="-1" role="dialog" aria-labelledby="medicalHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-green-600 text-white">
+            <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="medicalHistoryModalLabel">Medical History</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="modal-body">
-                @if($medicalRecords->isEmpty())
-                    <div class="alert alert-info">No medical records found.</div>
-                @else
-                    <div class="accordion" id="medicalRecordsAccordion">
-                        @foreach($medicalRecords as $index => $record)
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading{{ $index }}">
-                                    <button class="accordion-button {{ $index > 0 ? 'collapsed' : '' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
-                                        <strong>{{ $record->created_at->format('Y-m-d') }}</strong> - Medical Record
-                                    </button>
-                                </h2>
-                                <div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="heading{{ $index }}" data-bs-parent="#medicalRecordsAccordion">
-                                    <div class="accordion-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <p><strong>Date:</strong> {{ $record->created_at->format('Y-m-d') }}</p>
-                                                <p><strong>Doctor:</strong> {{ $record->doctor->name ?? 'Not Available' }}</p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <p><strong>Diagnosis:</strong> {{ $record->diagnosis ?? 'Not Available' }}</p>
-                                                <p><strong>Treatment:</strong> {{ $record->treatment ?? 'Not Available' }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <p><strong>Notes:</strong></p>
-                                            <p>{{ $record->notes }}</p>
-                                        </div>
-                                        @if($record->prescriptions && count($record->prescriptions) > 0)
-                                            <div class="mt-3">
-                                                <p><strong>Prescriptions:</strong></p>
-                                                <ul class="list-group">
-                                                    @foreach($record->prescriptions as $prescription)
-                                                        <li class="list-group-item">
-                                                            {{ $prescription->medication }} - {{ $prescription->dosage }} - {{ $prescription->instructions }}
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @endif
+           <div class="modal-body">
+    @if(isset($medicalRecords))
+        @if($medicalRecords->isEmpty())
+            <div class="alert alert-info">No medical records found.</div>
+        @else
+            <div class="accordion" id="medicalRecordsAccordion">
+                @foreach($medicalRecords as $index => $record)
+                    <div class="card mb-2">
+                        <div class="card-header" id="heading{{ $index }}">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{ $index }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
+                                    <i class="fas fa-file-medical mr-2"></i>
+                                    <strong>{{ $record->created_at->format('Y-m-d') }}</strong> - Medical Record
+                                </button>
+                            </h2>
+                        </div>
+
+                        <div id="collapse{{ $index }}" class="collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="heading{{ $index }}" data-parent="#medicalRecordsAccordion">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Date:</strong> {{ $record->created_at->format('Y-m-d') }}</p>
+                                        {{-- <p><strong>Doctor:</strong> {{ $record->doctor->name ?? 'Not Available' }}</p> --}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Diagnosis:</strong> {{ $record->diagnosis ?? 'Not Available' }}</p>
+                                        <p><strong>Treatment:</strong> {{ $record->treatment ?? 'Not Available' }}</p>
                                     </div>
                                 </div>
+                                <div class="mt-3">
+                                    <p><strong>Notes:</strong></p>
+                                    <p class="text-muted">{{ $record->notes }}</p>
+                                </div>
+                                @if($record->prescriptions && count($record->prescriptions) > 0)
+                                    <div class="mt-3">
+                                        <p><strong>Prescriptions:</strong></p>
+                                        <ul class="list-group">
+                                            @foreach($record->prescriptions as $prescription)
+                                                <li class="list-group-item">
+                                                    <strong>{{ $prescription->medication }}</strong> - {{ $prescription->dosage }} - {{ $prescription->instructions }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                             </div>
-                        @endforeach
+                        </div>
                     </div>
-                @endif
-                <p class="mt-3 text-muted">
-                    Note: You can view your medical history, but only authorized staff can update or modify these records.
-                </p>
+                @endforeach
             </div>
+        @endif
+    @else
+        <div class="alert alert-warning">Medical records are not available at the moment.</div>
+    @endif
+
+    <p class="text-muted mt-3">
+        Note: You can view your medical history, but only authorized staff can update or modify these records.
+    </p>
+</div>
+
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Footer -->
-<footer class="bg-black text-white p-6 mt-5">
-    <div class="container mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-            <div class="mb-4 md:mb-0">
-                <h3 class="text-lg font-bold mb-2">BiT Students Clinic</h3>
-                <p class="text-gray-400">Providing quality healthcare for students</p>
+<footer class="bg-dark text-white mt-5">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h3>BiT Students Clinic</h3>
+                <p>Providing quality healthcare for students</p>
             </div>
-            <div class="flex space-x-6">
-                <div>
-                    <h4 class="font-semibold mb-2">Quick Links</h4>
-                    <ul class="space-y-1">
-                        <li><a href="{{ url('/') }}" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="{{ route('patient.dashboard') }}" class="text-gray-400 hover:text-white transition">Dashboard</a></li>
-                        <li>
-                            <a href="{{ route('logout') }}" class="text-gray-400 hover:text-white transition" 
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-2">Contact</h4>
-                    <ul class="space-y-1">
-                        <li class="text-gray-400">support@bitstudentsclinic.com</li>
-                        <li class="text-gray-400">+251 911 123 456</li>
-                    </ul>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <h4>Quick Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="{{ url('/') }}" class="text-white">Home</a></li>
+                            <li><a href="{{ route('patient.dashboard') }}" class="text-white">Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Contact</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-envelope mr-2"></i> support@bitstudentsclinic.com</li>
+                            <li><i class="fas fa-phone mr-2"></i> +251 911 123 456</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-400">
-            <p>&copy; {{ date('Y') }} BiT Students Clinic. All rights reserved.</p>
-        </div>
+    </div>
+    <div class="text-center py-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        <p class="mb-0">&copy; {{ date('Y') }} BiT Students Clinic. All rights reserved.</p>
     </div>
 </footer>
 
+@push('styles')
+<style>
+    #patient-dashboard-wrapper {
+        overflow-x: hidden;
+    }
+    
+    #sidebar-wrapper {
+        min-height: 100vh;
+        transition: margin 0.25s ease-out;
+    }
+    
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+    
+    #menu-toggle {
+        cursor: pointer;
+    }
+    
+    .list-group-item.active {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .accordion .card-header {
+        background-color: #f8f9fa;
+    }
+    
+    @media (max-width: 768px) {
+        #sidebar-wrapper {
+            margin-left: -250px;
+        }
+        
+        #patient-dashboard-wrapper.toggled #sidebar-wrapper {
+            margin-left: 0;
+        }
+    }
+</style>
+@endpush
+
 @push('scripts')
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>
     // Toggle sidebar
     document.getElementById("menu-toggle").addEventListener("click", function(e) {
         e.preventDefault();
-        var wrapper = document.getElementById("patient-dashboard-wrapper");
-        wrapper.classList.toggle("toggled");
-        
-        if (wrapper.classList.contains("toggled")) {
-            document.getElementById("sidebar-wrapper").style.left = "-250px";
-            document.getElementById("page-content-wrapper").style.marginLeft = "0";
-        } else {
-            document.getElementById("sidebar-wrapper").style.left = "0";
-            document.getElementById("page-content-wrapper").style.marginLeft = "250px";
-        }
+        document.getElementById("patient-dashboard-wrapper").classList.toggle("toggled");
     });
+    
+    // Initialize tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
 </script>
 @endpush
+
 @endsection

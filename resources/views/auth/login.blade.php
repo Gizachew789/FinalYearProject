@@ -53,6 +53,53 @@
                                         {{ __('Remember Me') }}
                                     </label>
                                 </div>
+                        <!--        Forgot Password Trigger -->
+                  <!--    <div class="col-md-4">
+                           <button type="button" class="btn btn-link p-0 m-0 align-baseline text-primary" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                                 Forgot Password?
+                           </button>
+                       </div> -->
+                       
+                 <!--  Forgot Password Modal -->
+               <!--  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+         <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('password.email') }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (session('status'))
+                        <div class="alert alert-success">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input
+                            type="email"
+                            name="email"
+                            id="email"
+                            class="form-control @error('email') is-invalid @enderror"
+                            required
+                            autofocus
+                        >
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div> -->
+
                             </div>
                         </div>
 
@@ -70,4 +117,3 @@
     </div>
 </div>
 @endsection
-

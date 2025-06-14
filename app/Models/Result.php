@@ -15,14 +15,15 @@ class Result extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'patient_id',
-        'tested_by',
-        'disease_type',
-        'dosagsample_typee_form',
-        'result',
-        'Recommendation',
-        'result_date',
-    ];
+    'patient_id',
+    'tested_by',
+    'disease_type',
+    'sample_type',
+    'result',
+    'recommendation',
+    'result_date',
+];
+
 
     /**
      * The attributes that should be cast.
@@ -35,7 +36,7 @@ class Result extends Model
 
      public function patient()
   {
-    return $this->belongsTo(Patient::class, 'patient_id');
+    return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
   }
 
   public function tested_by_user()

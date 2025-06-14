@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 
 class AttendanceController extends Controller
@@ -14,51 +15,54 @@ class AttendanceController extends Controller
     /**
      * Display a listing of the attendances.
      */
-    public function index(Request $request)
-    {
-        $query = Attendance::with('user'); // changed staff to user
 
-        if ($request->has('user_id')) { // updated to user_id
-            $query->where('user_id', $request->user_id); // updated to user_id
-        }
+public function index()
+{
+    $today = Carbon::today()->toDateString();
 
-        if ($request->has('date')) {
-            $query->whereDate('date', $request->date);
-        }
+    // Fetch all users with their roles
+    $users = User::with('roles')->get();
 
-        $attendance = Attendance::latest()->first();
-        $attendances = $query->orderBy('date', 'desc')->paginate(10);
-       return view('admin.attendance.index', compact('attendances', 'attendance'));
+    // Get all today's attendance records indexed by user_id for quick access
+    $attendances = Attendance::whereDate('date', $today)
+        ->get()
+        ->keyBy('user_id');
 
-           $user = Auth::user(); // or however you want to get the user
-         return view('admin.attendance.index', compact('attendances', 'user'));
+    return view('admin.attendance.index', compact('users', 'attendances'));
+   // return view('admin.dashboard', compact('users'));
+}
 
-    }
+
 
     /**
      * Store a newly created attendance in storage.
      */
-    public function store(Request $request)
-   {
-    $validatedData = $request->validate([
+public function store(Request $request)
+{
+    $validated = $request->validate([
         'user_id' => 'required|exists:users,id',
         'date' => 'required|date',
-        'check_in' => 'required|date',
-        'check_out' => 'nullable|date',
-        'status' => 'required|string|in:present,absent,late,half_day',
+       /*  'check_in' => 'nullable|date_format:H:i',
+        'check_out' => 'nullable|date_format:H:i', */
+        'status' => 'required|in:present,absent,late,half_day',
     ]);
 
-    // Create a new attendance record
-    Attendance::create([
-        'user_id' => $validatedData['user_id'],
-        'date' => $validatedData['date'],
-        'check_in' => $validatedData['check_in'],
-        'check_out' => $validatedData['check_out'],
-        'status' => $validatedData['status'],
+    $attendance = new Attendance([
+        'user_id' => $validated['user_id'],
+        'date' => $validated['date'],
+       /*  'check_in' => $validated['check_in'] ?? null,
+        'check_out' => $validated['check_out'] ?? null, */
+        'status' => $validated['status'],
     ]);
 
-    return redirect()->route('admin.attendance.index')->with('success', 'Attendance record added successfully!');
- }
+    $attendance->save();
+
+    return redirect()->back()->with('success', 'Attendance recorded successfully.');
+}
+
+
+
+
 
 
     /**

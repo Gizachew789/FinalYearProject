@@ -41,7 +41,6 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>#</th>
                 <th>Name</th>
                 <th>Category</th>
                 <th>Current Stock</th>
@@ -76,7 +75,7 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>#</th>
+
                 <th>Name</th>
                 <th>Total Used</th>
             </tr>

@@ -9,10 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
-
 {
     use HasRoles;
-    use HasFactory, Notifiable; // Added HasApiTokens if API auth is used
+    use HasFactory, Notifiable;
+
+    protected $guard_name = 'web';
 
     protected $fillable = [
         'name',
@@ -20,9 +21,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'phone',
         'email',
-        'role',
+        'role',  // keep for backward compatibility
         'password',
-    
     ];
 
     protected $hidden = [
@@ -41,48 +41,47 @@ class User extends Authenticatable implements MustVerifyEmail
             $this->attributes['password'] = $value;
         }
     }
-    
 
-    // Role check methods
+    // Updated role check methods supporting both Spatie and role column
     public function isAdmin()
     {
-        return $this->role === 'Admin';
+        return $this->hasRole('Admin') || $this->role === 'Admin';
     }
 
     public function isHealthOfficer()
     {
-        return $this->role === 'Health_Officer';
+        return $this->hasRole('Health_Officer') || $this->role === 'Health_Officer';
     }
 
     public function isReception()
     {
-        return $this->role === 'Reception';
+        return $this->hasRole('Reception') || $this->role === 'Reception';
     }
 
     public function isLabTechnician()
     {
-        return $this->role === 'Lab_Technician';
+        return $this->hasRole('Lab_Technician') || $this->role === 'Lab_Technician';
     }
 
     public function isPharmacist()
     {
-        return $this->role === 'Pharmacist';
+        return $this->hasRole('Pharmacist') || $this->role === 'Pharmacist';
     }
+
     public function isNurse()
     {
-        return $this->role === 'Nurse';
+        return $this->hasRole('Nurse') || $this->role === 'Nurse';
     }
 
     public function isPatient()
     {
-        return $this->role === 'Patient';
+        return $this->hasRole('Patient') || $this->role === 'Patient';
     }
 
     public function isUser()
-  {
-    return $this->role === 'User'; // or whatever value you use for the user role
-  }
-
+    {
+        return $this->hasRole('User') || $this->role === 'User';
+    }
 
     // Relationships
     public function patient()
@@ -92,7 +91,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function healthOfficer()
     {
-        return $this->hasOne(HealthOfficer::class); // Capitalize class name properly
+        return $this->hasOne(HealthOfficer::class);
     }
 
     public function reception()
@@ -114,13 +113,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Admin::class);
     }
+
     public function nurse()
     {
         return $this->hasOne(Nurse::class);
     }
-    public function results()
-{
-    return $this->hasMany(Result::class, 'tested_by');
-}
 
+    public function results()
+    {
+        return $this->hasMany(Result::class, 'tested_by');
+    }
 }

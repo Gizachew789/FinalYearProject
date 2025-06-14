@@ -43,107 +43,126 @@ class MedicalRecordController extends Controller
         $patients = Patient::with('user')->get();
         $appointments = Appointment::all();
 
-        return view('medical_records.create', compact('patients', 'appointments'));
+        return view('staff.medical_records.create', compact('patients', 'appointments'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'appointment_id' => 'nullable|exists:appointments,id',
-            'diagnosis' => 'nullable|string',
-            'symptoms' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'follow_up_date' => 'nullable|date',
-        ]);
+  public function store(Request $request)
+{
+    $request->validate([
+        'patient_id' => 'required|exists:patients,patient_id',
+        'lab_results_id' => 'nullable|exists:results,id',
+        'diagnosis' => 'nullable|string',
+        'prescription' => 'nullable|string',
+        'treatment' => 'nullable|string',
+        'follow_up_date' => 'nullable|date',
+        'visit_date' => 'nullable|date',
+        'appointment_id' => 'nullable|exists:appointments,id',
+    ]);
 
-        $user = $request->user();
+    $user = $request->user();
 
-        if (!$user->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
-            abort(403, 'Unauthorized');
-        }
+    if (!$user->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
+        abort(403, 'Unauthorized');
+    }
+   dd($request->all());
 
-        $medicalRecord = MedicalRecord::create([
-            'patient_id' => $request->patient_id,
-            'appointment_id' => $request->appointment_id,
-            'created_by' => $user->id,
-            'diagnosis' => $request->diagnosis,
-            'symptoms' => $request->symptoms,
-            'treatment' => $request->treatment,
-            'notes' => $request->notes,
-            'follow_up_date' => $request->follow_up_date,
-        ]);
+    // Build the data array
+    $data = [
+        'patient_id' => $request->patient_id,
+        'created_by' => $user->id,
+        'diagnosis' => $request->diagnosis,
+        'treatment' => $request->treatment,
+        'prescription' => $request->prescription,
+        'visit_date' => $request->visit_date ?? now(),
+        'follow_up_date' => $request->follow_up_date,
+        'lab_results_id' => $request->lab_result_id,
+    ];
 
-        if ($request->appointment_id) {
-            $appointment = Appointment::find($request->appointment_id);
+    $medicalRecord = MedicalRecord::create($data);
+
+    if ($request->appointment_id) {
+        $appointment = Appointment::find($request->appointment_id);
+        if ($appointment) {
             $appointment->status = 'completed';
             $appointment->save();
         }
-
-        Notification::create([
-            'user_id' => $medicalRecord->patient->user_id,
-            'title' => 'New Medical Record',
-            'message' => 'A new medical record has been created for you.',
-            'type' => 'system',
-            'related_id' => $medicalRecord->id,
-            'related_type' => MedicalRecord::class,
-        ]);
-
-        return redirect()->route('medical_records.index')->with('success', 'Medical record created successfully.');
     }
+
+    Notification::create([
+        'user_id' => $medicalRecord->patient->user_id,
+        'title' => 'New Medical Record',
+        'message' => 'A new medical record has been created for you.',
+        'type' => 'system',
+        'related_id' => $medicalRecord->id,
+        'related_type' => MedicalRecord::class,
+    ]);
+
+    return redirect()->route('medical_records.index')->with('success', 'Medical record created successfully.');
+}
 
     public function show($id)
     {
+        $patient = Patient::with(['medicalHistory.createdBy', 'medicalHistory.labResult'])->findOrFail($id);
         $medicalRecord = MedicalRecord::with(['patient.user', 'appointment', 'documents'])->findOrFail($id);
         return view('medical_records.show', compact('medicalRecord'));
+        return view('staff.patients.show', compact('patient'));
     }
 
-    public function uploadDocumentForm($id)
+    /* public function uploadDocumentForm($id)
     {
         $medicalRecord = MedicalRecord::findOrFail($id);
         return view('medical_records.upload_document', compact('medicalRecord'));
-    }
+    } */
 
-    public function uploadDocument(Request $request, $id)
-    {
+    public function uploadMedicalDocument(Request $request, $patient_id)
+{
+    try {
+        // Ensure the patient exists
+         $patient = Patient::where('patient_id', $patient_id)->firstOrFail();
+
+        // Validate the uploaded file
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'file' => 'required|file|max:10240',
-            'document_date' => 'nullable|date',
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Max 5MB
         ]);
 
-        $user = $request->user();
-        $medicalRecord = MedicalRecord::findOrFail($id);
+        $file = $request->file('document');
 
-        if (!$user->hasAnyRole(['nurse', 'healthofficer', 'bsc_nurse'])) {
-            abort(403, 'Unauthorized');
+        if (!$file->isValid()) {
+            return back()->withErrors(['error' => 'The uploaded file is invalid.']);
         }
 
-        $path = $request->file('file')->store('documents');
+        $fileType = $file->getClientOriginalExtension() === 'pdf' ? 'pdf' : 'image';
 
-        $document = Document::create([
-            'medical_record_id' => $medicalRecord->id,
-            'uploaded_by' => $user->id,
-            'title' => $request->title,
-            'file_path' => $path,
-            'file_type' => $request->file('file')->getMimeType(),
-            'description' => $request->description,
-            'document_date' => $request->document_date ?? now(),
+        $filePath = $file->store('medical_documents', 'public');
+
+        $document = MedicalDocument::create([
+            'patient_id' => 'BDU1203250', // FIXED HERE
+            'file_path' => $filePath,
+            'file_type' => $fileType,
         ]);
 
-        Notification::create([
-            'user_id' => $medicalRecord->patient->user_id,
-            'title' => 'New Document Uploaded',
-            'message' => 'A new document has been uploaded to your medical record.',
-            'type' => 'system',
-            'related_id' => $document->id,
-            'related_type' => Document::class,
+        Log::info('Medical document uploaded', [
+            'patient_id' => $patient->patient_id,
+            'document_id' => $document->id,
+            'file_path' => $filePath
         ]);
 
-        return redirect()->route('medical_records.show', $medicalRecord->id)->with('success', 'Document uploaded successfully.');
+        return redirect()->route('staff.patients.show', $patient->patient_id)
+            ->with('success', 'Medical document uploaded successfully.');
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return back()->withErrors(['error' => 'Patient not found.']);
+    } catch (\Exception $e) {
+        Log::error('Failed to upload medical document', [
+            'patient_id' => $patient_id,
+            'error' => $e->getMessage()
+        ]);
+        return back()->withErrors([
+            'error' => 'Failed to upload medical document: ' . $e->getMessage()
+        ]);
     }
+}
+
 
     public function downloadDocument($documentId)
     {
@@ -155,4 +174,21 @@ class MedicalRecordController extends Controller
 
         return Storage::download($document->file_path, $document->title);
     }
+
+    public function search(Request $request)
+{
+    $request->validate([
+        'patient_id' => 'required|integer',
+    ]);
+
+    $patient = Patient::with(['medicalRecords', 'medicalDocuments'])
+        ->find($request->patient_id);
+
+    if (!$patient) {
+        return back()->with('error', 'Patient not found.');
+    }
+
+    return view('staff.medical_records.index', compact('patient'));
+}
+
 }

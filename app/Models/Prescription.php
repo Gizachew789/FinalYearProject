@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Medication;
 
 class Prescription extends Model
 {
@@ -28,10 +29,12 @@ class Prescription extends Model
     /**
      * The patient that the prescription is for.
      */
-    public function patient()
-    {
-        return $this->belongsTo(Patient::class);
-    }
+ 
+  public function patient()
+{
+    return $this->belongsTo(Patient::class, 'patient_id');
+}
+
 
     /**
      * The user (e.g., nurse or health officer) who prescribed.
@@ -40,4 +43,11 @@ class Prescription extends Model
     {
         return $this->belongsTo(User::class, 'prescriber_id');
     }
+
+public function medication()
+{
+    return $this->belongsTo(Medication::class, 'medication_id');
+            
+}
+
 }

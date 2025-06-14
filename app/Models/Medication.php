@@ -32,4 +32,5 @@ class Medication extends Model
     {
         return $this->hasMany(InventoryTransaction::class);
     }
+    
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use App\Models\Result;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -23,13 +24,13 @@ class PatientMedicalHistoryController extends Controller
         }
 
         // Load medical history sorted by latest visit date
-        $medicalHistory = $patient->medicalHistory()->latest('visit_date')->get();
+        $medicalRecords = MedicalRecord::where('patient_id', auth()->user()->patient_id)->latest()->get();
         Log::info('Patient medical history retrieved', [
-            'patient_id' => $patient->id,
-            'record_count' => $medicalHistory->count()
+            'patient_id' => $patient->patient_id,
+            'record_count' => $medicalRecords->count()
         ]);
 
-        return view('patient.medical_history.index', compact('medicalHistory'));
+        return view('patient.medical_history.index', compact('medicalRecords'));
     }
 
     /**
